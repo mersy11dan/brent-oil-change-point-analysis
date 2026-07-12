@@ -1,38 +1,27 @@
 # Brent Oil Price Change Point Analysis
 
-A data science project that detects statistically significant **structural change
-points** in historical Brent crude oil prices and associates them with major
-geopolitical, economic, and OPEC-related events.
+A data science project (10 Academy Week 10) that detects statistically significant
+**structural change points** in historical Brent crude oil prices and associates
+them with major geopolitical, OPEC, economic, sanctions, and pandemic events.
+
+**Status:** Interim submission complete - Task 1 (foundation) + initial EDA.
 
 ---
 
 ## Business Problem
 
-Brent crude oil is one of the most important benchmarks in the global energy
-market. Its price is highly volatile and is influenced by geopolitical conflicts,
-OPEC production decisions, economic shocks, sanctions, and shifts in global demand.
-
-Investors, policymakers, and energy companies need to understand **when** the
-behaviour of oil prices changes and **why**. Simply looking at the raw price
-series is not enough — abrupt or gradual regime shifts (change points) are often
-hidden in the noise.
-
-The core problem: *identify the points in time where the statistical properties
-of Brent oil prices change, and provide evidence-based context for those changes
-so stakeholders can make better risk and investment decisions.*
-
----
+The oil market is highly volatile, making it hard for investors to manage risk,
+for policymakers to plan for economic stability, and for energy companies to
+forecast costs. Working as data scientists at the consultancy **Birhan Energies**,
+our goal is to analyze how big political and economic events affect Brent oil
+prices and deliver clear, data-driven insights.
 
 ## Objectives
 
-- Build a clean, reproducible, production-ready project foundation.
-- Load and prepare historical Brent oil price data.
-- Detect change points in the price / log-return series using statistical and
-  Bayesian change point methods.
-- Quantify the magnitude and direction of each detected regime shift.
-- Associate detected change points with real-world events (geopolitical,
-  economic, OPEC policy).
-- Communicate insights through clear reports and visualisations.
+1. Identify key events that significantly impacted Brent oil prices over the studied period.
+2. Quantify how much these events shifted prices using Bayesian change point analysis.
+3. Provide clear, data-driven insights (with honest limitations) for investors,
+   policymakers, and energy companies.
 
 ---
 
@@ -40,20 +29,18 @@ so stakeholders can make better risk and investment decisions.*
 
 ```
 brent-oil-change-point-analysis/
-├── .github/
-│   └── workflows/        # CI/CD pipeline definitions
+├── .github/workflows/        # CI (pytest) - unittests.yml
+├── .vscode/                  # Editor settings
 ├── data/
-│   ├── raw/              # Immutable, original source data
-│   └── processed/        # Cleaned and transformed data
-├── notebooks/            # Exploratory data analysis (Jupyter)
-├── reports/              # Generated reports, figures, and write-ups
-├── scripts/              # Standalone / CLI scripts (data prep, pipelines)
-│   └── __init__.py
-├── src/                  # Reusable, importable source code (package)
-│   └── __init__.py
-├── tests/                # Unit and integration tests
-│   └── __init__.py
-├── requirements.txt      # Python dependencies
+│   ├── raw/                  # BrentOilPrices.csv, key_events.csv
+│   └── processed/            # Cleaned series (generated)
+├── notebooks/                # 01_eda.ipynb (initial EDA)
+├── reports/                  # Workflow doc, assumptions, figures, interim_report.html
+│   └── figures/
+├── scripts/                  # build_report.py
+├── src/                      # data_loader.py, eda.py
+├── tests/                    # unit tests
+├── requirements.txt
 ├── README.md
 ├── .gitignore
 └── LICENSE
@@ -63,56 +50,70 @@ brent-oil-change-point-analysis/
 
 ## Installation
 
-**Prerequisites:** Python 3.10+ and `git`.
+Prerequisites: Python 3.10+ and `git`.
 
 ```bash
-# 1. Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/mersy11dan/brent-oil-change-point-analysis.git
 cd brent-oil-change-point-analysis
 
-# 2. Create and activate a virtual environment
 python -m venv .venv
-
 # Windows (PowerShell)
 .venv\Scripts\Activate.ps1
-
 # macOS / Linux
 source .venv/bin/activate
 
-# 3. Install dependencies
 pip install -r requirements.txt
 ```
 
 ---
 
-## Project Workflow
+## Usage
 
-1. **Data ingestion** — place the raw Brent oil price dataset in `data/raw/`.
-2. **Data preparation** — clean and transform data; write outputs to
-   `data/processed/`. Reusable logic lives in `src/`, orchestrated by `scripts/`.
-3. **Exploratory analysis** — investigate trends, volatility, and stationarity in
-   `notebooks/`.
-4. **Change point modelling** — apply statistical and Bayesian change point
-   detection using code in `src/`.
-5. **Event association** — map detected change points to a curated set of
-   real-world events.
-6. **Reporting** — export figures and findings to `reports/`.
-7. **Testing & CI** — validate logic with `pytest`; automate checks via
-   `.github/workflows/`.
+```bash
+# Clean the raw data and write data/processed/brent_clean.csv
+python -m src.data_loader
+
+# Run the initial EDA notebook (regenerates reports/figures/*)
+jupyter nbconvert --to notebook --execute --inplace notebooks/01_eda.ipynb
+
+# Build the self-contained interim HTML report
+python scripts/build_report.py
+
+# Run the tests
+pytest -q
+```
+
+Then open `reports/interim_report.html` in any browser (no server needed - all
+figures are embedded).
+
+---
+
+## Interim Deliverables (Task 1)
+
+| Deliverable | Location |
+|-------------|----------|
+| Planned analysis workflow (1-2 pages) | [`reports/task1_analysis_workflow.md`](reports/task1_analysis_workflow.md) |
+| Assumptions & limitations (incl. correlation vs. causation) | [`reports/assumptions_and_limitations.md`](reports/assumptions_and_limitations.md) |
+| Curated key-events dataset (15 events) | [`data/raw/key_events.csv`](data/raw/key_events.csv) |
+| Initial EDA (notebook + figures) | [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb) |
+| Consolidated interim report (HTML) | [`reports/interim_report.html`](reports/interim_report.html) |
+
+### Initial EDA findings
+
+- Dataset: 9,011 trading days, 1987-05-20 to 2022-11-14 (min $9.10, max $143.95, mean $48.42).
+- The raw price series is **non-stationary** (ADF p = 0.29); daily **log returns are
+  stationary** (ADF p ~ 2.5e-29), so change points will be modeled on log returns.
+- Log returns show clear **volatility clustering** and a heavy-tailed distribution.
+- Several curated events visually align with abrupt regime shifts (2008, 2014-16, 2020, 2022).
 
 ---
 
-## Future Tasks
+## Roadmap
 
-- Compile a curated dataset of key geopolitical and OPEC events.
-- Implement and compare multiple change point detection algorithms.
-- Add a Bayesian change point model (e.g. with PyMC) for uncertainty estimates.
-- Build an interactive dashboard to explore change points and events.
-- Add CI workflows for linting, testing, and reproducibility checks.
-- Expand test coverage across the `src/` package.
-
----
+- **Task 2:** Bayesian change point model in PyMC (switch point `tau`, before/after
+  means, MCMC, convergence checks, quantified impact, event association).
+- **Task 3:** Flask API + React dashboard to explore change points and events.
 
 ## License
 
-This project is licensed under the terms of the [LICENSE](LICENSE) file.
+Licensed under the terms of the [LICENSE](LICENSE) file.
