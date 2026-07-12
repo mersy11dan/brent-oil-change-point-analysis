@@ -1,0 +1,17 @@
+[project]
+name = "brent-oil-change-point-analysis"
+version = "0.1.0"
+description = "Change point analysis and Bayesian modeling of Brent crude oil prices."
+requires-python = ">=3.10"
+
+[tool.black]
+line-length = 88
+target-version = ["py310", "py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 88
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
