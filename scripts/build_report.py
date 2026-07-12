@@ -20,8 +20,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from src.data_loader import add_log_returns, load_events, load_prices  # noqa: E402
 from src import eda  # noqa: E402
+from src.data_loader import add_log_returns, load_events, load_prices  # noqa: E402
 
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
 OUTPUT_PATH = PROJECT_ROOT / "reports" / "interim_report.html"

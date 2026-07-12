@@ -53,8 +53,13 @@ def plot_price_series(
     ax.set_ylabel("Price (USD per barrel)")
     if events is not None:
         for _, ev in events.iterrows():
-            ax.axvline(ev["event_date"], color="#c0392b", linestyle="--",
-                       linewidth=0.8, alpha=0.5)
+            ax.axvline(
+                ev["event_date"],
+                color="#c0392b",
+                linestyle="--",
+                linewidth=0.8,
+                alpha=0.5,
+            )
     return _save(fig, name)
 
 

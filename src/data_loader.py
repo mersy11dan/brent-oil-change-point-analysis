@@ -79,6 +79,8 @@ def save_processed(df: pd.DataFrame, path: str | Path = PROCESSED_PRICE_PATH) ->
 if __name__ == "__main__":
     prices = add_log_returns(load_prices())
     out_path = save_processed(prices)
-    print(f"Loaded {len(prices):,} rows spanning "
-          f"{prices['Date'].min().date()} to {prices['Date'].max().date()}")
+    print(
+        f"Loaded {len(prices):,} rows spanning "
+        f"{prices['Date'].min().date()} to {prices['Date'].max().date()}"
+    )
     print(f"Saved cleaned data to {out_path}")
