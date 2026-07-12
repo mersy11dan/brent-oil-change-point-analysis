@@ -22,15 +22,19 @@ dist/
 .env
 *.env
 
-# Data (keep folder structure via .gitkeep, ignore large files)
+# Data: ignore bulky/derived files, but track the source price data,
+# the curated events dataset, and the folder placeholders.
 data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
+!data/raw/BrentOilPrices.csv
+!data/raw/key_events.csv
 
-# Reports build artifacts
+# Reports: ignore transient PDF exports, but keep the delivered HTML report.
 reports/*.pdf
 reports/*.html
+!reports/interim_report.html
 
 # IDE / OS
 .vscode/*

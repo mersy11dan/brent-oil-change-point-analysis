@@ -1,0 +1,16 @@
+event_date,event_name,category,description,expected_impact
+1990-08-02,Iraq invades Kuwait (Gulf War),Conflict,Iraq's invasion of Kuwait triggered a supply shock and fears over Middle East oil flows.,Sharp price increase
+1997-07-02,Asian Financial Crisis,Economic,Currency and financial crisis across East Asia sharply reduced regional oil demand.,Price decrease
+1998-12-01,OPEC overproduction price collapse,OPEC,Weak demand combined with OPEC overproduction drove Brent to multi-year lows near $10.,Price decrease
+2001-09-11,September 11 attacks,Conflict,Terrorist attacks in the US created economic uncertainty and demand fears.,Short-term volatility / price decrease
+2003-03-20,US-led invasion of Iraq,Conflict,War in a major oil-producing region raised supply-disruption concerns.,Price increase
+2008-07-11,2008 oil price peak,Economic,Speculative demand and a weak US dollar pushed Brent to a record high near $147.,Peak then reversal
+2008-09-15,Global Financial Crisis (Lehman collapse),Economic,Collapse of Lehman Brothers triggered a global demand crash and steep price fall.,Sharp price decrease
+2011-02-15,Arab Spring & Libyan civil war,Conflict,Political upheaval across North Africa and the Middle East disrupted Libyan output.,Price increase
+2014-11-27,OPEC declines to cut output,OPEC,OPEC's decision to maintain production amid a US shale glut began a prolonged price collapse.,Sharp price decrease
+2016-01-20,2016 oil price trough,Economic,Oversupply and slowing demand pushed Brent below $30 to a cycle low.,Trough
+2016-11-30,OPEC+ production cut agreement,OPEC,OPEC and allies agreed to coordinated output cuts to rebalance the market.,Price increase
+2018-05-08,US withdraws from Iran nuclear deal,Sanctions,Reimposition of US sanctions on Iran threatened to remove barrels from the market.,Price increase
+2020-03-08,COVID-19 crash & OPEC+ price war,Pandemic,Pandemic demand collapse plus a Saudi-Russia price war caused a historic price crash.,Sharp price decrease
+2020-04-12,OPEC+ record production cut,OPEC,OPEC+ agreed to the largest coordinated supply cut in history to stabilize prices.,Price increase / stabilization
+2022-02-24,Russia invades Ukraine,Conflict,Invasion and ensuing sanctions on a major exporter drove prices sharply higher.,Sharp price increase
