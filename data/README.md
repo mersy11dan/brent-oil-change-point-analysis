@@ -26,7 +26,12 @@ Historical daily Brent crude oil spot price.
 
 ## `raw/key_events.csv`
 
-Curated set of 15 major events used to interpret detected change points.
+Curated set of 15 major events used to interpret detected change points. This is
+a **hand-compiled research dataset** (Task 1a deliverable), version-controlled in
+git so every change is tracked and reproducible.
+
+**Dataset version:** `v2` (2026-07) - added a `source` provenance column.
+**Previous:** `v1` - initial 15-event table without sources.
 
 | Column | Description |
 |--------|-------------|
@@ -35,8 +40,18 @@ Curated set of 15 major events used to interpret detected change points.
 | `category` | One of: Conflict, OPEC, Economic, Sanctions, Pandemic. |
 | `description` | One-line description of the event. |
 | `expected_impact` | Qualitative expected effect on price. |
+| `source` | Provenance: the authority/outlet the event was cross-checked against (e.g. U.S. EIA, OPEC, IMF, Reuters). |
 
 Event dates are approximate; markets may anticipate or lag the official date.
+
+**Provenance & method.** Events were selected for their documented, market-wide
+impact on Brent prices and cross-checked against authoritative sources: the U.S.
+Energy Information Administration (EIA) for energy-market context, OPEC for
+production decisions, the IMF for macroeconomic crises, and major news agencies
+(Reuters) for geopolitical events. The `source` column records the primary
+authority for each row. Because the dataset is small and manually curated, it is
+committed directly to the repository (not git-ignored) so it is versioned and
+reviewable alongside the code.
 
 ## `processed/brent_clean.csv`
 
