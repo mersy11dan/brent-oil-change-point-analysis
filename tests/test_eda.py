@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from src import eda
+from src.exceptions import DataValidationError
 
 
 def _synthetic_series(n: int = 500, seed: int = 0) -> pd.DataFrame:
@@ -50,3 +52,14 @@ def test_summarize_shape():
     assert summary["n_obs"] == len(df)
     assert summary["min_price"] <= summary["mean_price"] <= summary["max_price"]
     assert "adf_price" in summary and "adf_log_return" in summary
+
+
+def test_adf_report_too_few_obs_raises():
+    with pytest.raises(DataValidationError):
+        eda.adf_report(pd.Series([1.0, 2.0, 3.0]))
+
+
+def test_summarize_missing_columns_raises():
+    df = pd.DataFrame({"Date": pd.to_datetime(["2020-01-01"]), "Price": [50.0]})
+    with pytest.raises(DataValidationError):
+        eda.summarize(df)

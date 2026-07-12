@@ -38,8 +38,8 @@ brent-oil-change-point-analysis/
 ├── reports/                  # Workflow doc, assumptions, figures, interim_report.html
 │   └── figures/
 ├── scripts/                  # build_report.py
-├── src/                      # data_loader.py, eda.py
-├── tests/                    # unit tests
+├── src/                      # data_loader.py, eda.py, exceptions.py, logging_utils.py
+├── tests/                    # unit tests (incl. error-handling cases)
 ├── requirements.txt
 ├── README.md
 ├── .gitignore
@@ -94,7 +94,7 @@ figures are embedded).
 |-------------|----------|
 | Planned analysis workflow (1-2 pages) | [`reports/task1_analysis_workflow.md`](reports/task1_analysis_workflow.md) |
 | Assumptions & limitations (incl. correlation vs. causation) | [`reports/assumptions_and_limitations.md`](reports/assumptions_and_limitations.md) |
-| Curated key-events dataset (15 events) | [`data/raw/key_events.csv`](data/raw/key_events.csv) |
+| Curated key-events dataset (15 events, with source provenance) | [`data/raw/key_events.csv`](data/raw/key_events.csv) |
 | Initial EDA (notebook + figures) | [`notebooks/01_eda.ipynb`](notebooks/01_eda.ipynb) |
 | Consolidated interim report (HTML) | [`reports/interim_report.html`](reports/interim_report.html) |
 
@@ -107,6 +107,32 @@ figures are embedded).
 - Several curated events visually align with abrupt regime shifts (2008, 2014-16, 2020, 2022).
 
 ---
+
+## Code Quality & Engineering Practices
+
+The codebase is structured for reproducibility, readability, and testability:
+
+- **Modularity.** Logic is separated by concern: data loading/cleaning
+  (`src/data_loader.py`), analysis helpers (`src/eda.py`), typed errors
+  (`src/exceptions.py`), and logging config (`src/logging_utils.py`). Notebooks
+  and the report builder import these modules rather than duplicating logic.
+- **Error handling.** Loaders validate their inputs and raise typed exceptions
+  (`DataFileNotFoundError`, `DataValidationError`) with actionable messages -
+  missing files, missing columns, empty files, unparseable dates, and empty
+  results after cleaning are all caught explicitly instead of failing obscurely.
+- **Logging.** A shared `get_logger` helper gives every module consistent,
+  configurable logging instead of scattered `print` calls.
+- **Testing & CI.** `pytest` unit tests cover both the happy path and the
+  failure modes (see `tests/`), and run automatically on every push via GitHub
+  Actions (`.github/workflows/unittests.yml`).
+- **Formatting & tooling.** `black` + `isort` (configured in `pyproject.toml`)
+  enforce a consistent style; a `Makefile` exposes `make data|eda|report|test|lint|format`.
+- **Type hints & docstrings** throughout the `src/` package.
+
+```bash
+make lint    # black --check + isort --check-only
+make test    # run the full test suite
+```
 
 ## Roadmap
 

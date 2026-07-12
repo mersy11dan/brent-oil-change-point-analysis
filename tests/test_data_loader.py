@@ -4,8 +4,15 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import pytest
 
-from src.data_loader import add_log_returns, load_events, load_prices, parse_dates
+from src.data_loader import (
+    add_log_returns,
+    load_events,
+    load_prices,
+    parse_dates,
+)
+from src.exceptions import DataFileNotFoundError, DataValidationError
 
 
 def test_parse_dates_handles_mixed_formats():
@@ -41,3 +48,45 @@ def test_load_events_has_minimum_events():
         events.columns
     )
     assert events["event_date"].notna().all()
+
+
+def test_load_events_has_source_provenance():
+    events = load_events()
+    assert "source" in events.columns
+    # Every event must carry a non-empty provenance/source attribution.
+    assert events["source"].str.strip().str.len().gt(0).all()
+
+
+def test_load_prices_missing_file_raises():
+    with pytest.raises(DataFileNotFoundError):
+        load_prices("does/not/exist.csv")
+
+
+def test_load_prices_missing_column_raises(tmp_path):
+    bad = tmp_path / "bad.csv"
+    bad.write_text("Foo,Bar\n1,2\n", encoding="utf-8")
+    with pytest.raises(DataValidationError):
+        load_prices(bad)
+
+
+def test_load_events_missing_column_raises(tmp_path):
+    bad = tmp_path / "events.csv"
+    bad.write_text("event_date,event_name\n2020-01-01,Test\n", encoding="utf-8")
+    with pytest.raises(DataValidationError):
+        load_events(bad)
+
+
+def test_load_events_bad_date_raises(tmp_path):
+    bad = tmp_path / "events.csv"
+    bad.write_text(
+        "event_date,event_name,category,description,expected_impact\n"
+        "not-a-date,Test,Conflict,desc,up\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(DataValidationError):
+        load_events(bad)
+
+
+def test_add_log_returns_missing_price_raises():
+    with pytest.raises(DataValidationError):
+        add_log_returns(pd.DataFrame({"Date": pd.to_datetime(["2020-01-01"])}))

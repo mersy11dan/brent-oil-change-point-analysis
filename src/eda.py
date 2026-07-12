@@ -13,6 +13,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from statsmodels.tsa.stattools import adfuller
 
+from src.exceptions import DataValidationError
+from src.logging_utils import get_logger
+
+logger = get_logger(__name__)
+
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 FIGURES_DIR = PROJECT_ROOT / "reports" / "figures"
 
@@ -105,8 +110,17 @@ def plot_return_distribution(
 
 
 def adf_report(series: pd.Series) -> dict:
-    """Run an Augmented Dickey-Fuller test and return key results."""
+    """Run an Augmented Dickey-Fuller test and return key results.
+
+    Raises:
+        DataValidationError: if the series has too few non-null observations
+            for a meaningful test.
+    """
     clean = series.dropna()
+    if len(clean) < 10:
+        raise DataValidationError(
+            f"ADF test needs at least 10 observations, got {len(clean)}."
+        )
     stat, pvalue, used_lag, n_obs, crit, _ = adfuller(clean, autolag="AIC")
     return {
         "adf_statistic": float(stat),
@@ -119,7 +133,18 @@ def adf_report(series: pd.Series) -> dict:
 
 
 def summarize(df: pd.DataFrame) -> dict:
-    """Return summary statistics used in the report narrative."""
+    """Return summary statistics used in the report narrative.
+
+    Raises:
+        DataValidationError: if expected columns are missing.
+    """
+    required = {"Date", "Price", "LogReturn"}
+    missing = required - set(df.columns)
+    if missing:
+        raise DataValidationError(
+            f"summarize() requires column(s) {sorted(missing)}; "
+            "call add_log_returns() first."
+        )
     return {
         "n_obs": int(len(df)),
         "start_date": df["Date"].min().date().isoformat(),
