@@ -4,7 +4,8 @@ Exploratory and analysis notebooks for the Brent Oil Change Point Analysis proje
 
 | Notebook | Purpose |
 |----------|---------|
-| `01_eda.ipynb` | Initial exploratory data analysis: price trend, log returns, volatility clustering, and stationarity (ADF) testing. Exports figures to `../reports/figures/`. |
+| `01_eda.ipynb` | Initial EDA: price trend, log returns, volatility clustering, ADF stationarity. |
+| `02_change_point_model.ipynb` | Bayesian change point model (PyMC), ruptures multi-breaks, event association, impact quantification. |
 
 ## Conventions
 
