@@ -31,10 +31,20 @@ data/processed/*
 !data/raw/BrentOilPrices.csv
 !data/raw/key_events.csv
 
-# Reports: ignore transient PDF exports, but keep the delivered HTML report.
+# Reports: ignore transient PDF exports, but keep delivered HTML reports
+# and model outputs used by the dashboard.
 reports/*.pdf
 reports/*.html
 !reports/interim_report.html
+!reports/final_report.html
+!reports/model_results.json
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Backend caches
+backend/__pycache__/
 
 # IDE / OS
 .vscode/*
