@@ -1,0 +1,275 @@
+{
+  "generated_at": "2026-07-16T09:58:53.477084",
+  "data": {
+    "n_daily": 9011,
+    "n_monthly": 427,
+    "start_date": "1987-05-20",
+    "end_date": "2022-11-14"
+  },
+  "bayesian_change_point": {
+    "tau_date": "2005-02-28",
+    "tau_hdi": [
+      "2004-10-31",
+      "2005-06-30"
+    ],
+    "mu_before": 21.48,
+    "mu_after": 75.78,
+    "mu_before_hdi": [
+      18.99,
+      23.9
+    ],
+    "mu_after_hdi": [
+      73.27,
+      78.19
+    ],
+    "pct_change": 252.8,
+    "prob_increase": 1.0,
+    "r_hat": {
+      "tau": 1.0,
+      "mu_1": 1.0,
+      "mu_2": 1.0,
+      "sigma": 1.0
+    }
+  },
+  "nearest_events": [
+    {
+      "event_date": "2003-03-20",
+      "event_name": "US-led invasion of Iraq",
+      "category": "Conflict",
+      "days_from_tau": -711
+    },
+    {
+      "event_date": "2008-07-11",
+      "event_name": "2008 oil price peak",
+      "category": "Economic",
+      "days_from_tau": 1229
+    },
+    {
+      "event_date": "2001-09-11",
+      "event_name": "September 11 attacks",
+      "category": "Conflict",
+      "days_from_tau": -1266
+    },
+    {
+      "event_date": "2008-09-15",
+      "event_name": "Global Financial Crisis (Lehman collapse)",
+      "category": "Economic",
+      "days_from_tau": 1295
+    },
+    {
+      "event_date": "2011-02-15",
+      "event_name": "Arab Spring & Libyan civil war",
+      "category": "Conflict",
+      "days_from_tau": 2178
+    }
+  ],
+  "ruptures_change_points": [
+    "1999-11-30",
+    "2005-04-30",
+    "2011-02-28",
+    "2014-11-30",
+    "2021-07-31"
+  ],
+  "event_impact": [
+    {
+      "event_date": "1990-08-02",
+      "event_name": "Iraq invades Kuwait (Gulf War)",
+      "category": "Conflict",
+      "price_before": 16.37,
+      "price_after": 32.79,
+      "price_pct_change": 100.3,
+      "vol_before": 0.0257,
+      "vol_after": 0.0539
+    },
+    {
+      "event_date": "1997-07-02",
+      "event_name": "Asian Financial Crisis",
+      "category": "Economic",
+      "price_before": 18.06,
+      "price_after": 18.51,
+      "price_pct_change": 2.5,
+      "vol_before": 0.0188,
+      "vol_after": 0.0157
+    },
+    {
+      "event_date": "1998-12-01",
+      "event_name": "OPEC overproduction price collapse",
+      "category": "OPEC",
+      "price_before": 12.35,
+      "price_after": 10.4,
+      "price_pct_change": -15.8,
+      "vol_before": 0.0279,
+      "vol_after": 0.0341
+    },
+    {
+      "event_date": "2001-09-11",
+      "event_name": "September 11 attacks",
+      "category": "Conflict",
+      "price_before": 25.77,
+      "price_after": 20.78,
+      "price_pct_change": -19.4,
+      "vol_before": 0.0214,
+      "vol_after": 0.046
+    },
+    {
+      "event_date": "2003-03-20",
+      "event_name": "US-led invasion of Iraq",
+      "category": "Conflict",
+      "price_before": 31.95,
+      "price_after": 26.14,
+      "price_pct_change": -18.2,
+      "vol_before": 0.0227,
+      "vol_after": 0.0249
+    },
+    {
+      "event_date": "2008-07-11",
+      "event_name": "2008 oil price peak",
+      "category": "Economic",
+      "price_before": 125.95,
+      "price_after": 108.92,
+      "price_pct_change": -13.5,
+      "vol_before": 0.0217,
+      "vol_after": 0.0281
+    },
+    {
+      "event_date": "2008-09-15",
+      "event_name": "Global Financial Crisis (Lehman collapse)",
+      "category": "Economic",
+      "price_before": 121.14,
+      "price_after": 65.74,
+      "price_pct_change": -45.7,
+      "vol_before": 0.0249,
+      "vol_after": 0.0466
+    },
+    {
+      "event_date": "2011-02-15",
+      "event_name": "Arab Spring & Libyan civil war",
+      "category": "Conflict",
+      "price_before": 93.65,
+      "price_after": 116.47,
+      "price_pct_change": 24.4,
+      "vol_before": 0.0113,
+      "vol_after": 0.0206
+    },
+    {
+      "event_date": "2014-11-27",
+      "event_name": "OPEC declines to cut output",
+      "category": "OPEC",
+      "price_before": 88.7,
+      "price_after": 56.35,
+      "price_pct_change": -36.5,
+      "vol_before": 0.0123,
+      "vol_after": 0.0289
+    },
+    {
+      "event_date": "2016-01-20",
+      "event_name": "2016 oil price trough",
+      "category": "Economic",
+      "price_before": 39.55,
+      "price_after": 35.67,
+      "price_pct_change": -9.8,
+      "vol_before": 0.0244,
+      "vol_after": 0.0376
+    },
+    {
+      "event_date": "2016-11-30",
+      "event_name": "OPEC+ production cut agreement",
+      "category": "OPEC",
+      "price_before": 46.9,
+      "price_after": 54.16,
+      "price_pct_change": 15.5,
+      "vol_before": 0.0249,
+      "vol_after": 0.0218
+    },
+    {
+      "event_date": "2018-05-08",
+      "event_name": "US withdraws from Iran nuclear deal",
+      "category": "Sanctions",
+      "price_before": 68.3,
+      "price_after": 75.1,
+      "price_pct_change": 10.0,
+      "vol_before": 0.0168,
+      "vol_after": 0.0191
+    },
+    {
+      "event_date": "2020-03-08",
+      "event_name": "COVID-19 crash & OPEC+ price war",
+      "category": "Pandemic",
+      "price_before": 61.43,
+      "price_after": 25.88,
+      "price_pct_change": -57.9,
+      "vol_before": 0.0246,
+      "vol_after": 0.141
+    },
+    {
+      "event_date": "2020-04-12",
+      "event_name": "OPEC+ record production cut",
+      "category": "OPEC",
+      "price_before": 45.35,
+      "price_after": 32.35,
+      "price_pct_change": -28.7,
+      "vol_before": 0.0853,
+      "vol_after": 0.1116
+    },
+    {
+      "event_date": "2022-02-24",
+      "event_name": "Russia invades Ukraine",
+      "category": "Conflict",
+      "price_before": 84.63,
+      "price_after": 110.92,
+      "price_pct_change": 31.1,
+      "vol_before": 0.0252,
+      "vol_after": 0.0424
+    }
+  ],
+  "convergence_summary": [
+    {
+      "index": "tau",
+      "mean": "213.2",
+      "sd": "1.9",
+      "eti89_lb": "210",
+      "eti89_ub": "220",
+      "ess_bulk": 403,
+      "ess_tail": 375,
+      "r_hat": "1.00",
+      "mcse_mean": "0.097",
+      "mcse_sd": "0.081"
+    },
+    {
+      "index": "mu_1",
+      "mean": "21.48",
+      "sd": "1.27",
+      "eti89_lb": "19",
+      "eti89_ub": "23",
+      "ess_bulk": 2349,
+      "ess_tail": 1516,
+      "r_hat": "1.00",
+      "mcse_mean": "0.026",
+      "mcse_sd": "0.019"
+    },
+    {
+      "index": "mu_2",
+      "mean": "75.78",
+      "sd": "1.28",
+      "eti89_lb": "74",
+      "eti89_ub": "78",
+      "ess_bulk": 1541,
+      "ess_tail": 1420,
+      "r_hat": "1.00",
+      "mcse_mean": "0.033",
+      "mcse_sd": "0.022"
+    },
+    {
+      "index": "sigma",
+      "mean": "18.62",
+      "sd": "0.64",
+      "eti89_lb": "18",
+      "eti89_ub": "20",
+      "ess_bulk": 1706,
+      "ess_tail": 1479,
+      "r_hat": "1.00",
+      "mcse_mean": "0.016",
+      "mcse_sd": "0.011"
+    }
+  ]
+}

@@ -10,3 +10,5 @@ ruptures>=1.1.9
 scikit-learn>=1.4
 jupyter>=1.0
 pytest>=8.0
+flask>=3.0
+flask-cors>=4.0
