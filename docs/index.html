@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Brent Oil Change Point Analysis — Case Study</title>
+  <meta name="description" content="Bayesian change point analysis of Brent crude oil prices (1987–2022): how geopolitical, OPEC, and economic events reshape energy markets." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/site.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#top">Brent <span>Regime</span> Lab</a>
+      <div class="nav-links">
+        <a href="#problem">Problem</a>
+        <a href="#findings">Findings</a>
+        <a href="#explore">Explore</a>
+        <a href="#events">Events</a>
+        <a href="#method">Method</a>
+        <a href="#limits">Limits</a>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="hero-inner fade-in">
+      <div class="eyebrow">Portfolio case study · Time series · Bayesian ML</div>
+      <h1>When oil markets break, the data remembers.</h1>
+      <p class="lede">
+        A full change-point analysis of daily Brent crude prices from 1987 to 2022 —
+        detecting structural regime shifts with PyMC, linking them to geopolitical and
+        OPEC events, and quantifying impact for investors and policymakers.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#explore">Explore the charts</a>
+        <a class="btn btn-ghost" href="#findings">See key results</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="app" class="loading">
+    <section id="problem">
+      <h2>The business problem</h2>
+      <p class="section-lede">
+        Oil prices jump for reasons that look obvious in hindsight and chaotic in the moment.
+        At Birhan Energies, the brief was clear: identify when Brent’s statistical behaviour
+        changed, measure how large those shifts were, and connect them to real-world events —
+        without pretending correlation is causation.
+      </p>
+      <div class="stat-grid" id="metrics"></div>
+    </section>
+
+    <section id="findings">
+      <h2>Headline findings</h2>
+      <p class="section-lede" id="tauCopy">Loading…</p>
+      <div class="callout">
+        <strong>Quantified example — COVID crash (2020-03-08):</strong>
+        average price in the ±90-day window fell from about $61 to $26 (−58%),
+        while 30-day volatility exploded. The Russia–Ukraine invasion (2022-02-24)
+        saw the opposite move: roughly +31% in the same window.
+      </div>
+      <div class="figure-grid">
+        <figure class="figure">
+          <img src="./assets/cp_price_regimes.png" alt="Price regimes before and after Bayesian change point" />
+          <figcaption>Bayesian regimes: mean price before vs after the detected switch point τ.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="./assets/cp_tau_posterior.png" alt="Posterior distribution of change point tau" />
+          <figcaption>Posterior of τ — a narrow peak means high certainty about when the break occurred.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="explore">
+      <h2>Interactive exploration</h2>
+      <p class="section-lede">
+        Monthly Brent prices with curated events (dashed red), multi-break candidates from
+        <code>ruptures</code> (teal), and the Bayesian switch point (amber). Filter by event category.
+      </p>
+
+      <div class="controls">
+        <label>
+          Event category
+          <select id="categoryFilter"></select>
+        </label>
+      </div>
+
+      <div class="panel">
+        <h3>Brent price &amp; structural markers</h3>
+        <p class="hint">Amber = Bayesian τ · Teal = ruptures multi-breaks · Red dashed = curated events</p>
+        <div class="chart-wrap tall"><canvas id="priceChart"></canvas></div>
+      </div>
+
+      <div class="two-col">
+        <div class="panel">
+          <h3>Event impact (±90 days)</h3>
+          <p class="hint">Percent change in average price around each event</p>
+          <div class="chart-wrap"><canvas id="impactChart"></canvas></div>
+        </div>
+        <div class="panel">
+          <h3>Volatility clustering</h3>
+          <p class="hint">30-day rolling std. of daily log returns</p>
+          <div class="chart-wrap"><canvas id="volChart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="events">
+      <h2>Event impacts in detail</h2>
+      <p class="section-lede">
+        For each curated event, compare average price in the 90 days before vs after.
+        Large moves often align with wars, OPEC decisions, and demand shocks — but timing
+        can lead or lag the “official” date as markets anticipate news.
+      </p>
+      <div class="panel" style="overflow-x:auto">
+        <table id="impactTable">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Event</th>
+              <th>Category</th>
+              <th>Price before → after</th>
+              <th>Change</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <h3 style="margin-top:36px;font-family:var(--display)">Curated event timeline</h3>
+      <div class="panel" style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Event</th>
+              <th>Category</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody id="eventsList"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="eda">
+      <h2>What the raw series taught us</h2>
+      <p class="section-lede">
+        Before modeling, EDA showed a non-stationary price level, stationary log returns,
+        heavy tails, and clear volatility clustering — which is why the Bayesian model
+        targets regime means (with log-return diagnostics) rather than treating the whole
+        history as one homogeneous process.
+      </p>
+      <div class="figure-grid">
+        <figure class="figure">
+          <img src="./assets/price_series.png" alt="Full Brent price series with events" />
+          <figcaption>Full daily price history with key events marked.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="./assets/log_returns.png" alt="Daily log returns" />
+          <figcaption>Log returns — mean-reverting around zero with crisis bursts.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="./assets/rolling_volatility.png" alt="Rolling volatility" />
+          <figcaption>Rolling volatility highlights 2008 and 2020 as extreme regimes.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="./assets/return_distribution.png" alt="Return distribution" />
+          <figcaption>Leptokurtic returns — Normal likelihood is a starting point, not the end.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="method">
+      <h2>How the analysis works</h2>
+      <p class="section-lede">
+        End-to-end pipeline from messy CSV dates to posterior impact statements and a live dashboard.
+      </p>
+      <div class="steps">
+        <div class="step">
+          <div>
+            <h4>Clean &amp; transform</h4>
+            <p>Parse mixed date formats, dedupe, sort, compute log prices and log returns.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h4>EDA &amp; stationarity</h4>
+            <p>Trend, ADF tests, volatility clustering — inform the modeling target.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h4>Bayesian change point (PyMC)</h4>
+            <p>
+              Discrete uniform prior on τ; μ₁ / μ₂ selected with <code>pm.math.switch</code>;
+              Normal likelihood; MCMC via <code>pm.sample()</code>; check r̂ and traces.
+            </p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h4>Multi-break complement</h4>
+            <p><code>ruptures</code> Binseg finds additional regime dates beyond a single τ.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div>
+            <h4>Event association &amp; communication</h4>
+            <p>Compare τ and ruptures dates to curated events; quantify ±90-day impacts; report + dashboard.</p>
+          </div>
+        </div>
+      </div>
+      <div class="figure" style="margin-top:20px">
+        <img src="./assets/cp_trace.png" alt="MCMC trace plots" />
+        <figcaption>MCMC trace diagnostics for τ, μ₁, μ₂, and σ.</figcaption>
+      </div>
+    </section>
+
+    <section id="limits">
+      <h2>Assumptions &amp; limitations</h2>
+      <p class="section-lede">
+        A change point near an event is a <em>temporal association</em>, not proof of causation.
+        Markets anticipate news, events cluster (e.g. COVID + OPEC+ price war in 2020), and
+        unobserved drivers (inventories, FX, speculation) remain outside the model.
+      </p>
+      <div class="callout">
+        <strong>Practical stance:</strong> report breaks as evidence-supported hypotheses
+        (“consistent with”, “coincides with”) and always show uncertainty on τ.
+        Future work: multi-change-point models, Student-t likelihoods, and macro covariates (GDP, FX, inflation).
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2>What’s in the repo</h2>
+      <p class="section-lede">
+        Production-minded project layout: reusable <code>src/</code>, tests, Flask API,
+        React dashboard, notebooks, and this static portfolio site.
+      </p>
+      <div class="stat-grid">
+        <div class="stat"><div class="num">PyMC</div><div class="lbl">Bayesian MCMC</div></div>
+        <div class="stat"><div class="num">Flask</div><div class="lbl">Analysis API</div></div>
+        <div class="stat"><div class="num">React</div><div class="lbl">Interactive UI</div></div>
+        <div class="stat"><div class="num">pytest</div><div class="lbl">Automated tests</div></div>
+      </div>
+      <div class="cta-row" style="margin-top:24px">
+        <a class="btn btn-primary" href="https://github.com/mersy11dan/brent-oil-change-point-analysis" target="_blank" rel="noopener">View source on GitHub</a>
+        <a class="btn btn-ghost" href="./assets/screenshots/dashboard_overview.png" target="_blank" rel="noopener">Dashboard screenshot</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <span class="brand">Brent <span>Regime</span> Lab</span>
+    Bayesian change point analysis of Brent crude · Built for portfolio showcase ·
+    Data 1987–2022
+  </footer>
+
+  <script src="./js/app.js"></script>
+</body>
+</html>

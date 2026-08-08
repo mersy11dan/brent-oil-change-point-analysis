@@ -35,10 +35,35 @@ prices and deliver clear, data-driven insights.
 
 ---
 
+## Live portfolio website
+
+A self-contained case-study site lives in [`docs/`](docs/) — interactive Chart.js graphs,
+event impacts, methodology, and figures. **No Flask or Node required** to view it.
+
+**Local preview**
+
+```bash
+python scripts/build_portfolio_site.py
+# then open docs/index.html in a browser
+# or: python -m http.server 8080 --directory docs
+```
+
+**Deploy (GitHub Pages)**
+
+1. Push to `main` (workflow: `.github/workflows/pages.yml`).
+2. On GitHub → **Settings → Pages → Source**: choose **GitHub Actions**.
+3. After the workflow succeeds, the site is at:
+   `https://mersy11dan.github.io/brent-oil-change-point-analysis/`
+
+Use that URL as a portfolio project link.
+
+---
+
 ## Repository Structure
 
 ```
 brent-oil-change-point-analysis/
+├── docs/                     # Portfolio website (GitHub Pages)
 ├── backend/                  # Flask API
 ├── frontend/                 # React + Recharts dashboard
 ├── data/raw/                 # BrentOilPrices.csv, key_events.csv
@@ -130,6 +155,7 @@ Open http://127.0.0.1:5173 (Vite proxies `/api` → Flask on port 5000).
 
 | Item | Location |
 |------|----------|
+| Portfolio website (deployable) | [`docs/index.html`](docs/index.html) |
 | Final report (blog/PDF-ready HTML) | [`reports/final_report.html`](reports/final_report.html) |
 | Interim report | [`reports/interim_report.html`](reports/interim_report.html) |
 | Task 1 workflow & assumptions | [`reports/task1_analysis_workflow.md`](reports/task1_analysis_workflow.md), [`reports/assumptions_and_limitations.md`](reports/assumptions_and_limitations.md) |
