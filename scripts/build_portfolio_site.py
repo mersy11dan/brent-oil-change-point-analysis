@@ -46,11 +46,7 @@ def export_data() -> dict:
 
     # Monthly means for a smoother overview series.
     monthly = (
-        prices.set_index("Date")["Price"]
-        .resample("ME")
-        .mean()
-        .dropna()
-        .reset_index()
+        prices.set_index("Date")["Price"].resample("ME").mean().dropna().reset_index()
     )
     monthly_rows = [
         {

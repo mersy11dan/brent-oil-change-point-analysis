@@ -46,12 +46,8 @@ def main() -> None:
 
     result = cp.summarize_result(trace, monthly["Date"])
     print(f"\nChange point (median tau): {result.tau_date.date()}")
-    print(
-        f"95% CI: {result.tau_hdi[0].date()} to {result.tau_hdi[1].date()}"
-    )
-    print(
-        f"Mean before: ${result.mu_before:.2f} | Mean after: ${result.mu_after:.2f}"
-    )
+    print(f"95% CI: {result.tau_hdi[0].date()} to {result.tau_hdi[1].date()}")
+    print(f"Mean before: ${result.mu_before:.2f} | Mean after: ${result.mu_after:.2f}")
     print(
         f"Change: {result.pct_change:+.1f}% | P(mu_2 > mu_1) = {result.prob_increase:.3f}"
     )
@@ -74,9 +70,7 @@ def main() -> None:
         ["event_date", "event_name", "category", "days_from_tau"]
     ].head(5)
     nearest_records = nearest_records.copy()
-    nearest_records["event_date"] = nearest_records["event_date"].dt.date.astype(
-        str
-    )
+    nearest_records["event_date"] = nearest_records["event_date"].dt.date.astype(str)
 
     results = {
         "generated_at": pd.Timestamp.now().isoformat(),

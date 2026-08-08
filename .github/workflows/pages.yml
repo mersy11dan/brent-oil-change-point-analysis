@@ -1,21 +1,22 @@
-name: Deploy portfolio site to GitHub Pages
+# Optional: rebuild portfolio site assets on push.
+# Live hosting uses GitHub Pages "Deploy from a branch" → main → /docs
+# (more reliable than the Actions deploy-pages environment on first setup).
+
+name: Rebuild portfolio site
 
 on:
   push:
     branches: [main, master]
+    paths:
+      - "docs/**"
+      - "scripts/build_portfolio_site.py"
+      - "reports/**"
+      - "data/raw/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
-  build:
+  rebuild:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -32,21 +33,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install pandas numpy
 
-      - name: Build static site data & assets
+      - name: Rebuild docs data & assets
         run: python scripts/build_portfolio_site.py
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Verify site files exist
+        run: |
+          test -f docs/index.html
+          test -f docs/data/site_data.json
+          test -d docs/assets
+          echo "Portfolio site ready for Pages (branch main, folder /docs)."

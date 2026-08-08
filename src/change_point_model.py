@@ -135,9 +135,7 @@ def associate_events(
 
 def to_monthly(df: pd.DataFrame) -> pd.DataFrame:
     """Aggregate the daily price frame to monthly means (month-end dates)."""
-    monthly = (
-        df.set_index("Date")["Price"].resample("ME").mean().dropna().reset_index()
-    )
+    monthly = df.set_index("Date")["Price"].resample("ME").mean().dropna().reset_index()
     return monthly
 
 
@@ -189,20 +187,51 @@ def plot_price_with_changepoints(
 ) -> Path:
     """Plot monthly price with the Bayesian change point and regime means."""
     fig, ax = plt.subplots(figsize=(12, 5))
-    ax.plot(monthly["Date"], monthly["Price"], color="#1f4e79", linewidth=1.1,
-            label="Monthly avg price")
-    ax.axvline(result.tau_date, color="#c0392b", linestyle="--",
-               label=f"Change point ({result.tau_date.date()})")
-    ax.axvspan(result.tau_hdi[0], result.tau_hdi[1], color="#c0392b", alpha=0.12,
-               label="95% credible interval")
-    ax.hlines(result.mu_before, monthly["Date"].min(), result.tau_date,
-              color="#117a65", linewidth=2, label=f"Mean before (${result.mu_before:.1f})")
-    ax.hlines(result.mu_after, result.tau_date, monthly["Date"].max(),
-              color="#b9770e", linewidth=2, label=f"Mean after (${result.mu_after:.1f})")
+    ax.plot(
+        monthly["Date"],
+        monthly["Price"],
+        color="#1f4e79",
+        linewidth=1.1,
+        label="Monthly avg price",
+    )
+    ax.axvline(
+        result.tau_date,
+        color="#c0392b",
+        linestyle="--",
+        label=f"Change point ({result.tau_date.date()})",
+    )
+    ax.axvspan(
+        result.tau_hdi[0],
+        result.tau_hdi[1],
+        color="#c0392b",
+        alpha=0.12,
+        label="95% credible interval",
+    )
+    ax.hlines(
+        result.mu_before,
+        monthly["Date"].min(),
+        result.tau_date,
+        color="#117a65",
+        linewidth=2,
+        label=f"Mean before (${result.mu_before:.1f})",
+    )
+    ax.hlines(
+        result.mu_after,
+        result.tau_date,
+        monthly["Date"].max(),
+        color="#b9770e",
+        linewidth=2,
+        label=f"Mean after (${result.mu_after:.1f})",
+    )
     if extra_cp_dates is not None:
         for i, d in enumerate(extra_cp_dates):
-            ax.axvline(d, color="#6c3483", linestyle=":", alpha=0.6,
-                       label="ruptures change points" if i == 0 else None)
+            ax.axvline(
+                d,
+                color="#6c3483",
+                linestyle=":",
+                alpha=0.6,
+                label="ruptures change points" if i == 0 else None,
+            )
     ax.set_title("Brent Price with Detected Change Point(s)")
     ax.set_xlabel("Date")
     ax.set_ylabel("Price (USD/barrel)")
@@ -234,8 +263,8 @@ def event_impact_windows(
     rows = []
     for _, ev in events.iterrows():
         t = ev["event_date"]
-        before = d.loc[t - pd.Timedelta(days=window_days): t]
-        after = d.loc[t: t + pd.Timedelta(days=window_days)]
+        before = d.loc[t - pd.Timedelta(days=window_days) : t]
+        after = d.loc[t : t + pd.Timedelta(days=window_days)]
         if before.empty or after.empty:
             continue
         mp_b, mp_a = before["Price"].mean(), after["Price"].mean()

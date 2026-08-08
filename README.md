@@ -48,11 +48,14 @@ python scripts/build_portfolio_site.py
 # or: python -m http.server 8080 --directory docs
 ```
 
-**Deploy (GitHub Pages)**
+**Deploy (GitHub Pages — recommended)**
 
-1. Push to `main` (workflow: `.github/workflows/pages.yml`).
-2. On GitHub → **Settings → Pages → Source**: choose **GitHub Actions**.
-3. After the workflow succeeds, the site is at:
+The site is already in the `docs/` folder on `main`. Publish it like this:
+
+1. GitHub → **Settings → Pages**
+2. **Build and deployment → Source** → **Deploy from a branch**
+3. Branch: **`main`** · Folder: **`/docs`** → **Save**
+4. Wait ~1 minute, then open:
    `https://mersy11dan.github.io/brent-oil-change-point-analysis/`
 
 Use that URL as a portfolio project link.

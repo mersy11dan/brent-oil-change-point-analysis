@@ -13,8 +13,8 @@ import json
 from pathlib import Path
 from urllib.request import urlopen
 
-import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import matplotlib.pyplot as plt
 import pandas as pd
 
 API = "http://127.0.0.1:5000"
@@ -73,8 +73,18 @@ def capture_overview():
         for spine in ax.spines.values():
             spine.set_visible(False)
         ax.set_facecolor("#182a42")
-        ax.text(0.5, 0.62, value, ha="center", va="center", fontsize=14, fontweight="bold")
-        ax.text(0.5, 0.22, label.upper(), ha="center", va="center", fontsize=8, color="#8fa3b8")
+        ax.text(
+            0.5, 0.62, value, ha="center", va="center", fontsize=14, fontweight="bold"
+        )
+        ax.text(
+            0.5,
+            0.22,
+            label.upper(),
+            ha="center",
+            va="center",
+            fontsize=8,
+            color="#8fa3b8",
+        )
 
     ax = fig.add_subplot(gs[1, :])
     ax.plot(df["date"], df["price"], color="#3d8bfd", linewidth=1.2)
