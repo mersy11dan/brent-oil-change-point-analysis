@@ -3,264 +3,341 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Brent Oil Change Point Analysis — Case Study</title>
-  <meta name="description" content="Bayesian change point analysis of Brent crude oil prices (1987–2022): how geopolitical, OPEC, and economic events reshape energy markets." />
+  <title>Finding where Brent broke · Brent Regime Lab</title>
+  <meta name="description" content="A Bayesian change point study of 9,011 days of Brent crude prices, 1987 to 2022, and the wars, OPEC decisions and crises around each shift." />
+  <meta property="og:title" content="Finding where Brent broke" />
+  <meta property="og:description" content="Bayesian change point analysis of Brent crude, 1987 to 2022. Drag the break and see why the model chose February 2005." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="./assets/cp_price_regimes.png" />
+  <meta name="theme-color" content="#1f2b4d" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231f2b4d'/%3E%3Cpath d='M5 23h10V11h12' fill='none' stroke='%23f7941d' stroke-width='4'/%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./css/site.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <script>document.documentElement.classList.add('js')</script>
 </head>
 <body>
-  <nav class="nav">
-    <div class="nav-inner">
-      <a class="brand" href="#top">Brent <span>Regime</span> Lab</a>
-      <div class="nav-links">
-        <a href="#problem">Problem</a>
-        <a href="#findings">Findings</a>
-        <a href="#explore">Explore</a>
-        <a href="#events">Events</a>
-        <a href="#method">Method</a>
-        <a href="#limits">Limits</a>
-      </div>
-    </div>
-  </nav>
+  <a class="skip" href="#main">Skip to content</a>
 
-  <header class="hero" id="top">
-    <div class="hero-inner fade-in">
-      <div class="eyebrow">Portfolio case study · Time series · Bayesian ML</div>
-      <h1>When oil markets break, the data remembers.</h1>
-      <p class="lede">
-        A full change-point analysis of daily Brent crude prices from 1987 to 2022 —
-        detecting structural regime shifts with PyMC, linking them to geopolitical and
-        OPEC events, and quantifying impact for investors and policymakers.
-      </p>
-      <div class="cta-row">
-        <a class="btn btn-primary" href="#explore">Explore the charts</a>
-        <a class="btn btn-ghost" href="#findings">See key results</a>
-      </div>
-    </div>
+  <header class="nav wrap">
+    <a class="wordmark" href="#top">Brent Regime Lab</a>
+    <nav aria-label="Sections">
+      <a class="link" href="#findings">Findings</a>
+      <a class="link" href="#events">Events</a>
+      <a class="link" href="#method">Method</a>
+      <a class="link" href="#limits">Limits</a>
+    </nav>
   </header>
 
-  <main id="app" class="loading">
-    <section id="problem">
-      <h2>The business problem</h2>
-      <p class="section-lede">
-        Oil prices jump for reasons that look obvious in hindsight and chaotic in the moment.
-        At Birhan Energies, the brief was clear: identify when Brent’s statistical behaviour
-        changed, measure how large those shifts were, and connect them to real-world events —
-        without pretending correlation is causation.
-      </p>
-      <div class="stat-grid" id="metrics"></div>
-    </section>
-
-    <section id="findings">
-      <h2>Headline findings</h2>
-      <p class="section-lede" id="tauCopy">Loading…</p>
-      <div class="callout">
-        <strong>Quantified example — COVID crash (2020-03-08):</strong>
-        average price in the ±90-day window fell from about $61 to $26 (−58%),
-        while 30-day volatility exploded. The Russia–Ukraine invasion (2022-02-24)
-        saw the opposite move: roughly +31% in the same window.
-      </div>
-      <div class="figure-grid">
-        <figure class="figure">
-          <img src="./assets/cp_price_regimes.png" alt="Price regimes before and after Bayesian change point" />
-          <figcaption>Bayesian regimes: mean price before vs after the detected switch point τ.</figcaption>
-        </figure>
-        <figure class="figure">
-          <img src="./assets/cp_tau_posterior.png" alt="Posterior distribution of change point tau" />
-          <figcaption>Posterior of τ — a narrow peak means high certainty about when the break occurred.</figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section id="explore">
-      <h2>Interactive exploration</h2>
-      <p class="section-lede">
-        Monthly Brent prices with curated events (dashed red), multi-break candidates from
-        <code>ruptures</code> (teal), and the Bayesian switch point (amber). Filter by event category.
-      </p>
-
-      <div class="controls">
-        <label>
-          Event category
-          <select id="categoryFilter"></select>
-        </label>
+  <main id="main">
+    <section class="hero wrap" id="top" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <h1 class="lines display" id="hero-title">
+          <span class="line"><span data-line style="--i:0">Finding where</span></span>
+          <span class="line"><span data-line style="--i:1">Brent broke</span></span>
+        </h1>
+        <p class="hero-sentence" data-rise style="--i:2">
+          A Bayesian change point study of 9,011 days of Brent crude prices, 1987 to 2022,
+          and the events around each shift.
+        </p>
+        <a class="button" href="#findings" data-rise style="--i:3">See the findings</a>
       </div>
 
-      <div class="panel">
-        <h3>Brent price &amp; structural markers</h3>
-        <p class="hint">Amber = Bayesian τ · Teal = ruptures multi-breaks · Red dashed = curated events</p>
-        <div class="chart-wrap tall"><canvas id="priceChart"></canvas></div>
-      </div>
-
-      <div class="two-col">
-        <div class="panel">
-          <h3>Event impact (±90 days)</h3>
-          <p class="hint">Percent change in average price around each event</p>
-          <div class="chart-wrap"><canvas id="impactChart"></canvas></div>
-        </div>
-        <div class="panel">
-          <h3>Volatility clustering</h3>
-          <p class="hint">30-day rolling std. of daily log returns</p>
-          <div class="chart-wrap"><canvas id="volChart"></canvas></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="events">
-      <h2>Event impacts in detail</h2>
-      <p class="section-lede">
-        For each curated event, compare average price in the 90 days before vs after.
-        Large moves often align with wars, OPEC decisions, and demand shocks — but timing
-        can lead or lag the “official” date as markets anticipate news.
-      </p>
-      <div class="panel" style="overflow-x:auto">
-        <table id="impactTable">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Event</th>
-              <th>Category</th>
-              <th>Price before → after</th>
-              <th>Change</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-
-      <h3 style="margin-top:36px;font-family:var(--display)">Curated event timeline</h3>
-      <div class="panel" style="overflow-x:auto">
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Event</th>
-              <th>Category</th>
-              <th>Description</th>
-            </tr>
-          </thead>
-          <tbody id="eventsList"></tbody>
-        </table>
-      </div>
-    </section>
-
-    <section id="eda">
-      <h2>What the raw series taught us</h2>
-      <p class="section-lede">
-        Before modeling, EDA showed a non-stationary price level, stationary log returns,
-        heavy tails, and clear volatility clustering — which is why the Bayesian model
-        targets regime means (with log-return diagnostics) rather than treating the whole
-        history as one homogeneous process.
-      </p>
-      <div class="figure-grid">
-        <figure class="figure">
-          <img src="./assets/price_series.png" alt="Full Brent price series with events" />
-          <figcaption>Full daily price history with key events marked.</figcaption>
-        </figure>
-        <figure class="figure">
-          <img src="./assets/log_returns.png" alt="Daily log returns" />
-          <figcaption>Log returns — mean-reverting around zero with crisis bursts.</figcaption>
-        </figure>
-        <figure class="figure">
-          <img src="./assets/rolling_volatility.png" alt="Rolling volatility" />
-          <figcaption>Rolling volatility highlights 2008 and 2020 as extreme regimes.</figcaption>
-        </figure>
-        <figure class="figure">
-          <img src="./assets/return_distribution.png" alt="Return distribution" />
-          <figcaption>Leptokurtic returns — Normal likelihood is a starting point, not the end.</figcaption>
-        </figure>
-      </div>
-    </section>
-
-    <section id="method">
-      <h2>How the analysis works</h2>
-      <p class="section-lede">
-        End-to-end pipeline from messy CSV dates to posterior impact statements and a live dashboard.
-      </p>
-      <div class="steps">
-        <div class="step">
-          <div>
-            <h4>Clean &amp; transform</h4>
-            <p>Parse mixed date formats, dedupe, sort, compute log prices and log returns.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div>
-            <h4>EDA &amp; stationarity</h4>
-            <p>Trend, ADF tests, volatility clustering — inform the modeling target.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div>
-            <h4>Bayesian change point (PyMC)</h4>
-            <p>
-              Discrete uniform prior on τ; μ₁ / μ₂ selected with <code>pm.math.switch</code>;
-              Normal likelihood; MCMC via <code>pm.sample()</code>; check r̂ and traces.
-            </p>
-          </div>
-        </div>
-        <div class="step">
-          <div>
-            <h4>Multi-break complement</h4>
-            <p><code>ruptures</code> Binseg finds additional regime dates beyond a single τ.</p>
-          </div>
-        </div>
-        <div class="step">
-          <div>
-            <h4>Event association &amp; communication</h4>
-            <p>Compare τ and ruptures dates to curated events; quantify ±90-day impacts; report + dashboard.</p>
+      <div class="stage shutter">
+        <div class="stage-field">
+          <div class="breaker" data-ui aria-labelledby="breaker-title">
+            <div class="breaker-head">
+              <p class="breaker-title" id="breaker-title">Monthly Brent average, USD per barrel</p>
+              <button class="breaker-reset" type="button" id="br-reset" disabled>Snap to the model’s break</button>
+            </div>
+            <dl class="breaker-readout">
+              <div><dt>Break after</dt><dd id="br-month">Feb 2005</dd></div>
+              <div><dt>Mean before</dt><dd id="br-before">$21.39</dd></div>
+              <div><dt>Mean after</dt><dd id="br-after">$75.80</dd></div>
+              <div><dt>Fit error</dt><dd id="br-rmse">$18.51</dd></div>
+            </dl>
+            <div class="breaker-chart" id="br-chart">
+              <noscript><img src="./assets/cp_price_regimes.png" alt="Monthly Brent price with the Bayesian change point in February 2005 and the two regime means" width="1106" height="515" /></noscript>
+            </div>
+            <label class="breaker-slider">
+              <span class="sr-only">Move the break month</span>
+              <input type="range" id="br-range" min="6" max="421" step="1" value="214" />
+            </label>
+            <div class="breaker-foot">
+              <p class="breaker-status" id="br-status" aria-live="polite">Drag the orange line or use the slider.</p>
+              <div class="breaker-error" aria-hidden="true">
+                <div id="br-error"></div>
+                <span>Fit error for every break month</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-      <div class="figure" style="margin-top:20px">
-        <img src="./assets/cp_trace.png" alt="MCMC trace plots" />
-        <figcaption>MCMC trace diagnostics for τ, μ₁, μ₂, and σ.</figcaption>
+    </section>
+
+    <section class="ask wrap" id="ask" aria-label="Ask the price series about a month or an event">
+      <label class="sr-only" for="ask-input">Type a month, a year or an event</label>
+      <div class="ask-line" data-ui data-reveal>
+        <input id="ask-input" type="text" value="September 2008" autocomplete="off" spellcheck="false" enterkeyhint="search" />
+        <span class="ask-caret" aria-hidden="true"></span>
+      </div>
+      <div class="ask-result">
+        <div class="ask-answer" id="ask-answer" data-ui data-reveal style="--i:1" aria-live="polite"></div>
+        <figure class="ask-context" data-ui data-reveal style="--i:2">
+          <figcaption id="ask-context-title">Brent around the month you ask about</figcaption>
+          <div class="ask-chart" id="ask-chart"></div>
+        </figure>
+      </div>
+      <div class="ask-examples" data-reveal style="--i:2">
+        <p>Ask about any month from May 1987 to November 2022, a year, or an event. Try</p>
+        <div class="ask-chips">
+          <button type="button" data-q="April 2020">April 2020</button>
+          <button type="button" data-q="Gulf War">Gulf War</button>
+          <button type="button" data-q="1998">1998</button>
+        </div>
       </div>
     </section>
 
-    <section id="limits">
-      <h2>Assumptions &amp; limitations</h2>
-      <p class="section-lede">
-        A change point near an event is a <em>temporal association</em>, not proof of causation.
-        Markets anticipate news, events cluster (e.g. COVID + OPEC+ price war in 2020), and
-        unobserved drivers (inventories, FX, speculation) remain outside the model.
-      </p>
-      <div class="callout">
-        <strong>Practical stance:</strong> report breaks as evidence-supported hypotheses
-        (“consistent with”, “coincides with”) and always show uncertainty on τ.
-        Future work: multi-change-point models, Student-t likelihoods, and macro covariates (GDP, FX, inflation).
+    <section class="stats" id="findings" aria-labelledby="stats-figure">
+      <div class="stats-copy wrap">
+        <h2 class="stats-figure" id="stats-figure" data-reveal><span id="stats-count">+253%</span><span class="sr-only"> higher mean price after February 2005</span></h2>
+        <p class="stats-claim" data-reveal style="--i:1" aria-hidden="true">Mean price after February 2005</p>
+        <p class="stats-note" data-reveal style="--i:2">
+          Monthly prices averaged $21.48 a barrel before the break and $75.78 after it.
+          The 95% interval for the break runs from October 2004 to June 2005, and the
+          probability that the mean rose is 1.0.
+        </p>
+      </div>
+      <ol class="bars" id="bars" data-ui aria-label="Average Brent price by year, 1998 to 2011"></ol>
+    </section>
+
+    <figure class="sea">
+      <div class="sea-frame">
+        <img src="./assets/1-north-sea-oil-platform-240918.jpg" width="1920" height="1280" loading="lazy" decoding="async"
+             alt="A drilling platform on the horizon of a grey, choppy North Sea off Scotland at dusk" />
+      </div>
+      <figcaption class="wrap">
+        A platform in the North Sea off Scotland, the sea whose crude sets the Brent price.
+        Photo by NAC, <a class="link-plain" href="https://commons.wikimedia.org/wiki/File:1_North_Sea_oil_platform_240918.jpg">CC BY-SA 4.0</a>.
+      </figcaption>
+    </figure>
+
+    <section class="events wrap" id="events" aria-labelledby="events-title">
+      <div class="events-head">
+        <div>
+          <h2 class="head" id="events-title" data-reveal>What fifteen events did to the price</h2>
+          <p class="events-intro" data-reveal style="--i:1">
+            Average price in the 90 days after each event against the 90 days before.
+            Markets trade on expectations, so a move can start before the official date.
+          </p>
+        </div>
+        <a class="button button-quiet" data-reveal style="--i:2"
+           href="https://github.com/mersy11dan/brent-oil-change-point-analysis/blob/main/data/raw/key_events.csv">Download the event list</a>
+      </div>
+      <div class="events-body">
+        <div class="tabs" id="tabs" role="tablist" aria-label="Event category"></div>
+        <ol class="bands" id="bands" aria-live="polite"></ol>
       </div>
     </section>
 
-    <section id="stack">
-      <h2>What’s in the repo</h2>
-      <p class="section-lede">
-        Production-minded project layout: reusable <code>src/</code>, tests, Flask API,
-        React dashboard, notebooks, and this static portfolio site.
-      </p>
-      <div class="stat-grid">
-        <div class="stat"><div class="num">PyMC</div><div class="lbl">Bayesian MCMC</div></div>
-        <div class="stat"><div class="num">Flask</div><div class="lbl">Analysis API</div></div>
-        <div class="stat"><div class="num">React</div><div class="lbl">Interactive UI</div></div>
-        <div class="stat"><div class="num">pytest</div><div class="lbl">Automated tests</div></div>
+    <section class="figures wrap" id="figures" aria-labelledby="figures-title">
+      <h2 class="figures-title" id="figures-title" data-reveal>The working figures</h2>
+      <div class="tiles">
+        <figure class="tile pair-a" data-reveal>
+          <a href="./assets/price_series.png"><img src="./assets/price_series.png" width="1116" height="522" loading="lazy" decoding="async" alt="Daily Brent price from 1987 to 2022 with the fifteen curated events marked as vertical lines" /></a>
+          <figcaption>
+            <span class="row"><span>9,011 days</span><span>Low $9.10</span><span>High $143.95</span><span>Mean $48.42</span></span>
+            <span class="row"><span>May 1987 to Nov 2022</span><span>01_eda.ipynb</span></span>
+            <span class="row">Daily price with the curated events</span>
+          </figcaption>
+        </figure>
+        <figure class="tile pair-b" data-reveal style="--i:1">
+          <a href="./assets/log_returns.png"><img src="./assets/log_returns.png" width="1124" height="522" loading="lazy" decoding="async" alt="Daily log returns hovering around zero with large spikes in 1990, 2008 and 2020" /></a>
+          <figcaption>
+            <span class="row"><span>SD 0.0255</span><span>Skew −1.74</span><span>Min −0.644</span><span>Max 0.412</span></span>
+            <span class="row"><span>ADF p &lt; 0.001, stationary</span><span>01_eda.ipynb</span></span>
+            <span class="row">Daily log returns</span>
+          </figcaption>
+        </figure>
+        <figure class="tile pair-c" data-reveal>
+          <a href="./assets/rolling_volatility.png"><img src="./assets/rolling_volatility.png" width="1132" height="522" loading="lazy" decoding="async" alt="Thirty-day rolling volatility with clusters around 2008 and a tall peak in 2020" /></a>
+          <figcaption>
+            <span class="row"><span>30-day window</span><span>Peak 0.187</span><span>May 2020</span><span>2008 high 0.054</span></span>
+            <span class="row"><span>Volatility clusters</span><span>01_eda.ipynb</span></span>
+            <span class="row">Rolling volatility of log returns</span>
+          </figcaption>
+        </figure>
+        <figure class="tile pair-d" data-reveal style="--i:1">
+          <a href="./assets/return_distribution.png"><img src="./assets/return_distribution.png" width="781" height="522" loading="lazy" decoding="async" alt="Histogram of daily log returns, sharply peaked with long tails on both sides" /></a>
+          <figcaption>
+            <span class="row"><span>n 9,010</span><span>Kurtosis 65.9</span><span>Skew −1.74</span><span>Heavy tails</span></span>
+            <span class="row"><span>Normal is a starting point</span><span>01_eda.ipynb</span></span>
+            <span class="row">Distribution of daily returns</span>
+          </figcaption>
+        </figure>
+        <figure class="tile pair-b" data-reveal>
+          <a href="./assets/cp_price_regimes.png"><img src="./assets/cp_price_regimes.png" width="1106" height="515" loading="lazy" decoding="async" alt="Monthly price with the change point in February 2005 and the mean of each regime drawn as a flat line" /></a>
+          <figcaption>
+            <span class="row"><span>Break Feb 2005</span><span>Before $21.48</span><span>After $75.78</span><span>+252.8%</span></span>
+            <span class="row"><span>PyMC, 427 months</span><span>02_change_point_model.ipynb</span></span>
+            <span class="row">Price regimes either side of the break</span>
+          </figcaption>
+        </figure>
+        <figure class="tile pair-a" data-reveal style="--i:1">
+          <a href="./assets/cp_tau_posterior.png"><img src="./assets/cp_tau_posterior.png" width="1105" height="430" loading="lazy" decoding="async" alt="Posterior distribution of the break month, a narrow spike in early 2005" /></a>
+          <figcaption>
+            <span class="row"><span>From Oct 2004</span><span>To Jun 2005</span><span>SD 1.9 months</span><span>ESS 403</span></span>
+            <span class="row"><span>95% interval</span><span>02_change_point_model.ipynb</span></span>
+            <span class="row">Posterior of the break month</span>
+          </figcaption>
+        </figure>
+        <figure class="tile pair-d" data-reveal>
+          <a href="./assets/cp_trace.png"><img src="./assets/cp_trace.png" width="1322" height="1043" loading="lazy" decoding="async" alt="MCMC trace plots and histograms for the break month, both regime means and sigma, all well mixed" /></a>
+          <figcaption>
+            <span class="row"><span>R-hat 1.00</span><span>ESS 2,349</span><span>ESS 1,541</span><span>Sigma 18.62</span></span>
+            <span class="row"><span>All chains mixed</span><span>02_change_point_model.ipynb</span></span>
+            <span class="row">MCMC trace diagnostics</span>
+          </figcaption>
+        </figure>
+        <figure class="tile pair-c" data-reveal style="--i:1">
+          <a href="./assets/screenshots/dashboard_overview.png"><img src="./assets/screenshots/dashboard_overview.png" width="1440" height="900" loading="lazy" decoding="async" alt="The analyst console showing headline numbers, the price chart with the break and the event list" /></a>
+          <figcaption>
+            <span class="row"><span>React 18</span><span>Recharts</span><span>Flask API</span><span>6 endpoints</span></span>
+            <span class="row"><span>Runs locally</span><span>frontend/</span></span>
+            <span class="row">The analyst console</span>
+          </figcaption>
+        </figure>
       </div>
-      <div class="cta-row" style="margin-top:24px">
-        <a class="btn btn-primary" href="https://github.com/mersy11dan/brent-oil-change-point-analysis" target="_blank" rel="noopener">View source on GitHub</a>
-        <a class="btn btn-ghost" href="./assets/screenshots/dashboard_overview.png" target="_blank" rel="noopener">Dashboard screenshot</a>
+    </section>
+
+    <section class="method wrap" id="method" aria-labelledby="method-title">
+      <h2 class="method-title" id="method-title">How the break was found</h2>
+      <div class="method-steps">
+        <div class="method-step is-active" data-step="0">
+          <p class="method-statement">First, clean 9,011 daily prices.</p>
+          <p>Two date formats share one file, “20-May-87” and “Nov 14, 2022”. Each row is parsed, sorted, de-duplicated and given a log return.</p>
+        </div>
+        <div class="method-step" data-step="1">
+          <p class="method-statement">Then let PyMC weigh every month as the break.</p>
+          <p>A uniform prior over 427 monthly averages, one mean either side and a Normal likelihood. Every parameter converged with R-hat at 1.00.</p>
+        </div>
+        <div class="method-step" data-step="2">
+          <p class="method-statement">Finally, line the break up with what happened.</p>
+          <p>The nearest curated events sit two to six years away, so February 2005 reads as a slow change of regime rather than one shock. An independent ruptures search lands on April 2005.</p>
+        </div>
       </div>
+      <div class="method-stage">
+        <div class="method-fragment" data-ui data-state="0" id="method-fragment">
+          <div class="state" data-for="0">
+            <p class="frag-title">BrentOilPrices.csv, after cleaning</p>
+            <table>
+              <thead><tr><th scope="col">Raw date</th><th scope="col">Parsed</th><th scope="col">Price</th><th scope="col">Log return</th></tr></thead>
+              <tbody>
+                <tr><td>20-May-87</td><td>1987-05-20</td><td>18.63</td><td>none</td></tr>
+                <tr><td>21-May-87</td><td>1987-05-21</td><td>18.45</td><td>−0.0097</td></tr>
+                <tr><td>22-May-87</td><td>1987-05-22</td><td>18.55</td><td>0.0054</td></tr>
+                <tr class="gap"><td colspan="4">9,005 more rows</td></tr>
+                <tr><td>Nov 10, 2022</td><td>2022-11-10</td><td>94.25</td><td>0.0128</td></tr>
+                <tr><td>Nov 11, 2022</td><td>2022-11-11</td><td>96.37</td><td>0.0222</td></tr>
+                <tr class="is-selected"><td>Nov 14, 2022</td><td>2022-11-14</td><td>93.59</td><td>−0.0293</td></tr>
+              </tbody>
+            </table>
+            <p class="frag-foot">9,011 rows kept, 0 dropped</p>
+          </div>
+          <div class="state" data-for="1">
+            <p class="frag-title">Posterior summary</p>
+            <table>
+              <thead><tr><th scope="col">Parameter</th><th scope="col">Mean</th><th scope="col">SD</th><th scope="col">ESS</th><th scope="col">R-hat</th></tr></thead>
+              <tbody>
+                <tr class="is-selected"><td>Break month</td><td>Feb 2005</td><td>1.9 mo</td><td>403</td><td>1.00</td></tr>
+                <tr><td>Mean before</td><td>$21.48</td><td>1.27</td><td>2,349</td><td>1.00</td></tr>
+                <tr><td>Mean after</td><td>$75.78</td><td>1.28</td><td>1,541</td><td>1.00</td></tr>
+                <tr><td>Sigma</td><td>18.62</td><td>0.64</td><td>1,706</td><td>1.00</td></tr>
+              </tbody>
+            </table>
+            <p class="frag-foot">P(mean after &gt; mean before) = 1.0</p>
+          </div>
+          <div class="state" data-for="2">
+            <p class="frag-title">Distance from the break</p>
+            <ol class="frag-timeline">
+              <li><span>2001-09-11</span><span>September 11 attacks</span><span>3.5 years before</span></li>
+              <li><span>2003-03-20</span><span>US-led invasion of Iraq</span><span>23 months before</span></li>
+              <li class="is-selected"><span>2005-02-28</span><span>Bayesian break</span><span>Ruptures: Apr 2005</span></li>
+              <li><span>2008-07-11</span><span>2008 oil price peak</span><span>3.4 years after</span></li>
+              <li><span>2008-09-15</span><span>Lehman collapse</span><span>3.5 years after</span></li>
+              <li><span>2011-02-15</span><span>Arab Spring and Libya</span><span>6 years after</span></li>
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="letter-field" id="limits" aria-label="What this analysis cannot tell you">
+      <article class="sheet" data-reveal>
+        <p>This study finds when Brent’s behaviour changed. It cannot prove why. When a break lands near a war or an OPEC meeting, that is a coincidence in time, and I report it as <mark>consistent with, not caused by</mark>.</p>
+        <p>Markets also move before the news. Traders priced in the Iraq invasion for months before March 2003, so a break can lead its event. Two events can share a window too, as COVID and the Saudi–Russia price war did in March 2020.</p>
+        <p>The model is deliberately simple: one break, two means and a Normal likelihood. Daily returns have far heavier tails than a Normal allows, with excess kurtosis near 66, and inventories, the dollar and interest rates sit outside the model entirely.</p>
+        <p>Next I would fit several breaks at once, swap in a Student&#8209;t likelihood, and add GDP, exchange rates and inflation as covariates.</p>
+        <p class="sign">Mihret Daniel</p>
+        <p class="role">Data scientist, for the Birhan Energies brief</p>
+        <div class="tear">
+          <a class="link-plain" href="https://github.com/mersy11dan/brent-oil-change-point-analysis">github.com/mersy11dan/brent-oil-change-point-analysis</a>
+        </div>
+      </article>
+    </section>
+
+    <section class="name wrap" id="name" aria-labelledby="name-title">
+      <figure class="name-main" data-reveal>
+        <img src="./assets/east-of-graythorp-industrial-estate-geograph-5432358.jpg" width="1920" height="1462" loading="lazy" decoding="async"
+             alt="The rusted topside of the Brent Delta platform sitting on land at Hartlepool beside electricity pylons under a grey sky" />
+        <figcaption>Brent Delta’s topside at Hartlepool, June 2017. Photo from Geograph, <a class="link-plain" href="https://commons.wikimedia.org/wiki/File:East_of_Graythorp_Industrial_Estate_(geograph_5432358).jpg">CC BY-SA 2.0</a>.</figcaption>
+      </figure>
+      <div class="name-copy">
+        <h2 class="head" id="name-title" data-reveal>The goose behind the name</h2>
+        <p data-reveal style="--i:1">The benchmark is named after the Brent oilfield, 186 km north-east of Lerwick in the Shetland Islands. Shell named its North Sea fields after seabirds in order of discovery: Auk, Brent, Cormorant, Dunlin. Brent is the brent goose.</p>
+        <p data-reveal style="--i:2">The field has since been lifted out of the sea. Brent Delta’s topside was carried to Hartlepool in 2017 and broken up for recycling. The price kept the name.</p>
+        <figure class="name-goose" data-reveal style="--i:3">
+          <img src="./assets/brent-goose-branta-bernicla-in-flight.jpg" width="1920" height="1276" loading="lazy" decoding="async"
+               alt="A dark-bellied brent goose in flight against a clear blue sky" />
+          <figcaption>Brent goose over Amrum. Photo by Hobbyfotowiki, <a class="link-plain" href="https://commons.wikimedia.org/wiki/File:Brent_goose_(Branta_bernicla)_in_flight.jpg">CC0</a>.</figcaption>
+        </figure>
+      </div>
+      <figure class="name-map" data-reveal>
+        <img src="./assets/brent-crude-oil-map.png" width="1920" height="1484" loading="lazy" decoding="async"
+             alt="Map of the North Sea showing the Brent, Oseberg, Forties and Ekofisk fields and their pipelines to Shetland, Norway and Britain" />
+        <figcaption>The four fields in the Brent blend. Map by the U.S. Energy Information Administration, <a class="link-plain" href="https://commons.wikimedia.org/wiki/File:Brent_crude_oil_map.png">public domain</a>.</figcaption>
+      </figure>
     </section>
   </main>
 
-  <footer class="site-footer">
-    <span class="brand">Brent <span>Regime</span> Lab</span>
-    Bayesian change point analysis of Brent crude · Built for portfolio showcase ·
-    Data 1987–2022
+  <footer class="board">
+    <div class="tile-statement">
+      <p>A 10 Academy project for the Birhan Energies brief, built in Python, PyMC, Flask and React.</p>
+      <p class="legal">MIT licence. Daily Brent spot prices, 20 May 1987 to 14 November 2022.</p>
+    </div>
+    <nav class="tile-nav" aria-label="Footer">
+      <a class="link" href="#findings">Findings</a>
+      <a class="link" href="#events">Events</a>
+      <a class="link" href="#figures">Figures</a>
+      <a class="link" href="#method">Method</a>
+      <a class="link" href="#limits">Limits</a>
+    </nav>
+    <div class="tile-time">
+      <p>Brent field, East Shetland Basin</p>
+      <p class="time"><span id="lerwick-time">--:--</span><span>in Lerwick, the nearest town</span></p>
+    </div>
+    <div class="tile-mail">
+      <a class="link" href="https://github.com/mersy11dan">github.com/mersy11dan</a>
+    </div>
+    <div class="tile-word" aria-hidden="true"><span>Brent Regime Lab</span></div>
+    <a class="tile-go" href="https://github.com/mersy11dan/brent-oil-change-point-analysis">
+      <span>Read the code</span>
+      <svg viewBox="0 0 48 48" width="56" height="56" aria-hidden="true"><path d="M10 38 38 10M16 10h22v22" fill="none" stroke="currentColor" stroke-width="4" /></svg>
+    </a>
   </footer>
 
+  <script src="./data/site_data.js"></script>
   <script src="./js/app.js"></script>
 </body>
 </html>
