@@ -1,7 +1,8 @@
 """Generate dashboard demonstration figures from the live Flask API.
 
-Produces PNGs in ``reports/screenshots/`` for the final report when a headless
-browser is not available. Run with the API up::
+The committed PNGs in ``reports/screenshots/`` are browser captures of the
+analyst console. This script draws matplotlib stand-ins in the console's
+palette for when a headless browser is not available. Run with the API up::
 
     python backend/app.py
     python scripts/capture_dashboard_views.py
@@ -29,14 +30,14 @@ def get(path: str):
 def style():
     plt.rcParams.update(
         {
-            "figure.facecolor": "#0b1624",
-            "axes.facecolor": "#122033",
-            "axes.edgecolor": "#2a3f58",
-            "axes.labelcolor": "#e8eef6",
-            "text.color": "#e8eef6",
-            "xtick.color": "#8fa3b8",
-            "ytick.color": "#8fa3b8",
-            "grid.color": "#2a3f58",
+            "figure.facecolor": "#f4f4f2",
+            "axes.facecolor": "#ffffff",
+            "axes.edgecolor": "#e3e1dc",
+            "axes.labelcolor": "#1f2b4d",
+            "text.color": "#1f2b4d",
+            "xtick.color": "#5f667b",
+            "ytick.color": "#5f667b",
+            "grid.color": "#e7e6e1",
             "font.size": 10,
         }
     )
@@ -72,7 +73,7 @@ def capture_overview():
         ax.set_yticks([])
         for spine in ax.spines.values():
             spine.set_visible(False)
-        ax.set_facecolor("#182a42")
+        ax.set_facecolor("#ffffff")
         ax.text(
             0.5, 0.62, value, ha="center", va="center", fontsize=14, fontweight="bold"
         )
@@ -83,19 +84,19 @@ def capture_overview():
             ha="center",
             va="center",
             fontsize=8,
-            color="#8fa3b8",
+            color="#5f667b",
         )
 
     ax = fig.add_subplot(gs[1, :])
-    ax.plot(df["date"], df["price"], color="#3d8bfd", linewidth=1.2)
+    ax.plot(df["date"], df["price"], color="#1f2b4d", linewidth=1.2)
     tau = pd.Timestamp(cps["bayesian"]["tau_date"])
-    ax.axvline(tau, color="#e85d5d", linestyle="--", linewidth=1.4, label="Bayesian τ")
+    ax.axvline(tau, color="#f7941d", linestyle="-", linewidth=2, label="Bayesian τ")
     for d in cps["ruptures"]:
-        ax.axvline(pd.Timestamp(d), color="#aa78ff", linestyle=":", alpha=0.7)
+        ax.axvline(pd.Timestamp(d), color="#1f2b4d", linestyle=":", alpha=0.6)
     ax.set_title("Historical Brent Price with Change Points")
     ax.set_ylabel("USD / barrel")
     ax.grid(True, alpha=0.3)
-    ax.legend(loc="upper left", facecolor="#122033", edgecolor="#2a3f58")
+    ax.legend(loc="upper left", facecolor="#ffffff", edgecolor="#e3e1dc")
 
     ax2 = fig.add_subplot(gs[2, :])
     ax2.set_xticks([])
@@ -122,10 +123,10 @@ def capture_event_impact():
     impact = get("/api/event-impact")["data"]
     df = pd.DataFrame(impact)
     fig, ax = plt.subplots(figsize=(13, 6))
-    colors = ["#3ecf8e" if v >= 0 else "#e85d5d" for v in df["price_pct_change"]]
+    colors = ["#1f2b4d" if v >= 0 else "#b42345" for v in df["price_pct_change"]]
     labels = [n[:28] for n in df["event_name"]]
     ax.barh(labels, df["price_pct_change"], color=colors)
-    ax.axvline(0, color="#8fa3b8", linewidth=0.8)
+    ax.axvline(0, color="#5f667b", linewidth=0.8)
     ax.set_xlabel("% price change (±90-day window)")
     ax.set_title("Dashboard · Event Impact Drill-down")
     ax.invert_yaxis()
@@ -144,17 +145,17 @@ def capture_event_highlight():
     covid = next(e for e in events if "COVID" in e["event_name"])
 
     fig, ax = plt.subplots(figsize=(13, 5.5))
-    ax.plot(df["date"], df["price"], color="#3d8bfd", linewidth=1.3, label="Price")
+    ax.plot(df["date"], df["price"], color="#1f2b4d", linewidth=1.3, label="Price")
     ax.axvline(
         pd.Timestamp(covid["event_date"]),
-        color="#f0a06a",
+        color="#f7941d",
         linewidth=2,
         label=f"Highlighted: {covid['event_name']}",
     )
     ax.set_title("Dashboard · Event Highlight (COVID-19 crash & OPEC+ price war)")
     ax.set_ylabel("USD / barrel")
     ax.grid(True, alpha=0.3)
-    ax.legend(facecolor="#122033", edgecolor="#2a3f58")
+    ax.legend(facecolor="#ffffff", edgecolor="#e3e1dc")
     # Callout box
     ax.text(
         0.02,
@@ -163,7 +164,7 @@ def capture_event_highlight():
         transform=ax.transAxes,
         va="top",
         fontsize=9,
-        bbox=dict(boxstyle="round", facecolor="#182a42", edgecolor="#f0a06a"),
+        bbox=dict(boxstyle="round", facecolor="#fff4e6", edgecolor="#f7941d"),
     )
     path = OUT / "dashboard_event_highlight.png"
     fig.savefig(path, dpi=120, bbox_inches="tight")
