@@ -141,6 +141,11 @@ npm run dev
 
 Open http://127.0.0.1:5173 (Vite proxies `/api` → Flask on port 5000).
 
+![The analyst console with the Lehman collapse selected](reports/screenshots/dashboard_overview.png)
+
+Filters and the selected event live in the URL, so a view can be shared, for example
+`/?from=2007-01-01&to=2009-12-31&event=2008-09-15`.
+
 ### API endpoints
 
 | Endpoint | Description |

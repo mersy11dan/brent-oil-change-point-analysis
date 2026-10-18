@@ -1,424 +1,214 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  CartesianGrid,
-  Legend,
-  Line,
-  LineChart,
-  ReferenceLine,
-  ResponsiveContainer,
-  Tooltip,
-  XAxis,
-  YAxis,
-  BarChart,
-  Bar,
-} from "recharts";
-import {
-  fetchChangePoints,
-  fetchEventImpact,
-  fetchEvents,
-  fetchMetrics,
-  fetchPrices,
-} from "./api";
+import EventDetail from "./components/EventDetail";
+import EventList from "./components/EventList";
+import ImpactChart from "./components/ImpactChart";
+import ImpactTable from "./components/ImpactTable";
+import ModelPanel from "./components/ModelPanel";
+import PriceChart from "./components/PriceChart";
+import Readout from "./components/Readout";
+import { ApiError, ConsoleSkeleton } from "./components/States";
+import Toolbar from "./components/Toolbar";
+import TopBar from "./components/TopBar";
+import { day, toTime } from "./format";
+import { CATEGORIES, DATA_END, DATA_START, PAGES_URL, PRESETS } from "./theme";
+import { downsample, useActiveSection, useAnalysis } from "./useDashboardData";
 
-const CATEGORIES = ["All", "Conflict", "OPEC", "Economic", "Sanctions", "Pandemic"];
+const SECTIONS = ["overview", "impact", "model", "table"];
+const DEFAULT_RANGE = { start: DATA_START, end: DATA_END, preset: "all" };
+const YEAR_MS = 365.25 * 864e5;
 
-function formatUSD(n) {
-  if (n == null || Number.isNaN(n)) return "—";
-  return `$${Number(n).toFixed(2)}`;
+const ISO = /^\d{4}-\d{2}-\d{2}$/;
+
+function readUrl() {
+  const q = new URLSearchParams(window.location.search);
+  const from = q.get("from");
+  const to = q.get("to");
+  const cat = q.get("category");
+  const ev = q.get("event");
+  const valid = from && to && ISO.test(from) && ISO.test(to);
+  return {
+    range: valid ? { start: from, end: to, preset: PRESETS.find((p) => p.start === from && p.end === to)?.id ?? null } : DEFAULT_RANGE,
+    category: CATEGORIES.includes(cat) ? cat : "All",
+    selected: ev && ISO.test(ev) ? { event_date: ev } : null,
+  };
 }
 
-function Metric({ label, value }) {
-  return (
-    <div className="metric">
-      <div className="label">{label}</div>
-      <div className="value">{value}</div>
-    </div>
-  );
-}
+const clampIso = (t) => {
+  const iso = new Date(t).toISOString().slice(0, 10);
+  return iso < DATA_START ? DATA_START : iso > DATA_END ? DATA_END : iso;
+};
 
 export default function App() {
-  const [metrics, setMetrics] = useState(null);
-  const [prices, setPrices] = useState([]);
-  const [events, setEvents] = useState([]);
-  const [changePoints, setChangePoints] = useState(null);
-  const [impact, setImpact] = useState([]);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
-
-  const [start, setStart] = useState("2000-01-01");
-  const [end, setEnd] = useState("2022-12-31");
-  const [category, setCategory] = useState("All");
-  const [selectedEvent, setSelectedEvent] = useState(null);
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const cat = category === "All" ? undefined : category;
-      const [m, p, e, cp, imp] = await Promise.all([
-        fetchMetrics(),
-        fetchPrices({ start, end, max_points: 1200 }),
-        fetchEvents({ category: cat }),
-        fetchChangePoints(),
-        fetchEventImpact({ category: cat }),
-      ]);
-      setMetrics(m);
-      setPrices(p.data || []);
-      setEvents(e.data || []);
-      setChangePoints(cp);
-      setImpact(imp.data || []);
-    } catch (err) {
-      setError(err.message || "Failed to load dashboard data");
-    } finally {
-      setLoading(false);
-    }
-  }, [start, end, category]);
+  const analysis = useAnalysis();
+  const data = analysis.data;
+  const [initial] = useState(readUrl);
+  const [range, setRange] = useState(initial.range);
+  const [category, setCategory] = useState(initial.category);
+  const [selected, setSelected] = useState(initial.selected);
 
   useEffect(() => {
-    load();
-  }, [load]);
+    const q = new URLSearchParams();
+    if (range.preset !== "all") {
+      q.set("from", range.start);
+      q.set("to", range.end);
+    }
+    if (category !== "All") q.set("category", category);
+    if (selected) q.set("event", selected.event_date);
+    const search = q.toString();
+    window.history.replaceState(null, "", `${window.location.pathname}${search ? `?${search}` : ""}${window.location.hash}`);
+  }, [range, category, selected]);
+  const active = useActiveSection(SECTIONS, analysis.status === "ready");
 
-  const chartData = useMemo(() => {
-    return prices.map((row) => ({
-      date: row.date,
-      price: row.price,
-    }));
-  }, [prices]);
+  const rangeError = !range.start || !range.end
+    ? "Enter both a start and an end date."
+    : range.start > range.end
+      ? "The start date must be on or before the end date."
+      : "";
 
-  const impactChart = useMemo(() => {
-    return impact.map((row) => ({
-      name: row.event_name.replace(/\s*\(.*\)\s*$/, "").slice(0, 22),
-      pct: row.price_pct_change,
-    }));
-  }, [impact]);
+  const byCategory = useCallback(
+    (list) => (category === "All" ? list : list.filter((r) => r.category === category)),
+    [category],
+  );
+  const events = useMemo(() => byCategory(data?.events || []), [data, byCategory]);
+  const impact = useMemo(() => byCategory(data?.impact || []), [data, byCategory]);
+  const impactByDate = useMemo(() => new Map((data?.impact || []).map((r) => [r.event_date, r])), [data]);
+  const counts = useMemo(() => {
+    const c = { All: data?.events.length || 0 };
+    for (const e of data?.events || []) c[e.category] = (c[e.category] || 0) + 1;
+    return c;
+  }, [data]);
 
-  const bayesian = changePoints?.bayesian;
-  const ruptures = changePoints?.ruptures || [];
+  const daily = data?.prices || [];
+  const inRange = useMemo(
+    () => (rangeError ? [] : daily.filter((d) => d.date >= range.start && d.date <= range.end)),
+    [daily, range.start, range.end, rangeError],
+  );
+  const chartData = useMemo(() => downsample(inRange), [inRange]);
+  const inView = useMemo(() => {
+    if (!inRange.length) return null;
+    let lo = inRange[0].price;
+    let hi = lo;
+    let sum = 0;
+    for (const d of inRange) {
+      sum += d.price;
+      if (d.price < lo) lo = d.price;
+      if (d.price > hi) hi = d.price;
+    }
+    return { mean: sum / inRange.length, lo, hi };
+  }, [inRange]);
 
-  if (loading && !metrics) {
-    return <div className="loading">Loading dashboard…</div>;
-  }
+  const selectedEvent = selected ? data?.events.find((e) => e.event_date === selected.event_date) || null : null;
+  const selectedInRange = selectedEvent && selectedEvent.event_date >= range.start && selectedEvent.event_date <= range.end;
 
-  if (error && !metrics) {
-    return (
-      <div className="error">
-        <p>{error}</p>
-        <p>Start the Flask API: <code>python backend/app.py</code></p>
-      </div>
-    );
-  }
+  const select = useCallback((ev) => setSelected(ev ? { event_date: ev.event_date } : null), []);
+  const selectAndReveal = useCallback(
+    (ev) => {
+      select(ev);
+      if (ev) requestAnimationFrame(() => document.getElementById("detail-title")?.scrollIntoView({ block: "center" }));
+    },
+    [select],
+  );
+  const zoomTo = useCallback((ev) => {
+    const t = toTime(ev.event_date);
+    setRange({ start: clampIso(t - 2 * YEAR_MS), end: clampIso(t + 2 * YEAR_MS), preset: null });
+  }, []);
+  const changeCategory = useCallback(
+    (c) => {
+      setCategory(c);
+      if (selectedEvent && c !== "All" && selectedEvent.category !== c) setSelected(null);
+    },
+    [selectedEvent],
+  );
+  const reset = () => {
+    setRange(DEFAULT_RANGE);
+    setCategory("All");
+    setSelected(null);
+  };
+  const isDefault = range.preset === "all" && category === "All" && !selected;
 
   return (
-    <div className="app">
-      <header className="hero">
-        <div>
-          <div className="badge">Birhan Energies · Week 10</div>
-          <h1>Brent Oil Change Point Dashboard</h1>
-          <p>
-            Explore how geopolitical, OPEC, and economic events align with
-            structural breaks in Brent crude prices — with Bayesian change-point
-            results and interactive event highlights.
-          </p>
-        </div>
-      </header>
+    <>
+      <a className="skip" href="#main">
+        Skip to the console
+      </a>
+      <TopBar active={active} apiState={analysis.status} />
 
-      <section className="metrics">
-        <Metric label="Observations" value={metrics?.n_obs?.toLocaleString()} />
-        <Metric label="Latest Price" value={formatUSD(metrics?.latest_price)} />
-        <Metric label="Mean Price" value={formatUSD(metrics?.mean_price)} />
-        <Metric label="Volatility (σ)" value={metrics?.volatility ?? "—"} />
-        <Metric label="Bayesian τ" value={bayesian?.tau_date ?? "—"} />
-        <Metric
-          label="Regime Shift"
-          value={
-            bayesian?.pct_change != null
-              ? `${bayesian.pct_change > 0 ? "+" : ""}${bayesian.pct_change}%`
-              : "—"
-          }
-        />
-      </section>
+      {analysis.status === "error" ? (
+        <main id="main">
+          <ApiError message={analysis.error} onRetry={analysis.reload} />
+        </main>
+      ) : !data ? (
+        <main id="main">
+          <ConsoleSkeleton />
+        </main>
+      ) : (
+        <>
+          <Toolbar
+            range={range}
+            onRange={setRange}
+            category={category}
+            onCategory={changeCategory}
+            counts={counts}
+            rangeError={rangeError}
+            onReset={reset}
+            isDefault={isDefault}
+          />
+          <main id="main" className="page">
+            <section id="overview" aria-label="Overview">
+              <Readout metrics={data.metrics} bayesian={data.changePoints?.bayesian} inView={inView} />
+              <div className="overview">
+                <PriceChart
+                  prices={chartData}
+                  range={range}
+                  rangeError={rangeError}
+                  bayesian={data.changePoints?.bayesian}
+                  ruptures={data.changePoints?.ruptures || []}
+                  events={events}
+                  selected={selectedEvent}
+                />
+                <EventDetail
+                  event={selectedEvent}
+                  impact={selectedEvent ? impactByDate.get(selectedEvent.event_date) : null}
+                  daily={daily}
+                  tauDate={data.changePoints?.bayesian?.tau_date}
+                  inRange={selectedInRange}
+                  onZoom={zoomTo}
+                  onClear={() => setSelected(null)}
+                />
+                <EventList
+                  events={events}
+                  impactByDate={impactByDate}
+                  selected={selectedEvent}
+                  onSelect={select}
+                  range={range}
+                  category={category}
+                />
+              </div>
+            </section>
 
-      <section className="controls">
-        <label>
-          Start date
-          <input type="date" value={start} onChange={(e) => setStart(e.target.value)} />
-        </label>
-        <label>
-          End date
-          <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} />
-        </label>
-        <label>
-          Event category
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>
-                {c}
-              </option>
-            ))}
-          </select>
-        </label>
-        <button type="button" onClick={load}>
-          Apply filters
-        </button>
-        <button
-          type="button"
-          className="ghost"
-          onClick={() => {
-            setSelectedEvent(null);
-            setStart("1987-05-20");
-            setEnd("2022-11-14");
-            setCategory("All");
-          }}
-        >
-          Reset
-        </button>
-      </section>
-
-      <section className="grid-2">
-        <div className="panel">
-          <h2>Historical Brent Price</h2>
-          <p className="sub">
-            Red = Bayesian change point · Purple = ruptures breaks · Orange =
-            selected event highlight
-          </p>
-          <div className="chart-wrap">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData}>
-                <CartesianGrid stroke="rgba(255,255,255,0.06)" />
-                <XAxis
-                  dataKey="date"
-                  tick={{ fill: "#8fa3b8", fontSize: 11 }}
-                  minTickGap={40}
-                />
-                <YAxis
-                  tick={{ fill: "#8fa3b8", fontSize: 11 }}
-                  domain={["auto", "auto"]}
-                  width={48}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "#122033",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 10,
-                  }}
-                />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="price"
-                  name="Price (USD/bbl)"
-                  stroke="#3d8bfd"
-                  strokeWidth={1.6}
-                  dot={false}
-                  isAnimationActive={false}
-                />
-                {bayesian?.tau_date && (
-                  <ReferenceLine
-                    x={bayesian.tau_date}
-                    stroke="#e85d5d"
-                    strokeDasharray="4 4"
-                    label={{
-                      value: "Bayesian τ",
-                      fill: "#e85d5d",
-                      fontSize: 11,
-                      position: "insideTopLeft",
-                    }}
-                  />
-                )}
-                {ruptures.map((d) => (
-                  <ReferenceLine
-                    key={d}
-                    x={d}
-                    stroke="#aa78ff"
-                    strokeDasharray="2 4"
-                    strokeOpacity={0.7}
-                  />
-                ))}
-                {selectedEvent && (
-                  <ReferenceLine
-                    x={selectedEvent.event_date}
-                    stroke="#f0a06a"
-                    strokeWidth={2}
-                    label={{
-                      value: selectedEvent.event_name.slice(0, 28),
-                      fill: "#f0a06a",
-                      fontSize: 11,
-                      position: "insideTopRight",
-                    }}
-                  />
-                )}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="panel">
-          <h2>Key Events</h2>
-          <p className="sub">Click an event to highlight it on the price chart.</p>
-          <ul className="event-list">
-            {events.map((ev) => (
-              <li
-                key={`${ev.event_date}-${ev.event_name}`}
-                className={
-                  selectedEvent?.event_name === ev.event_name ? "active" : ""
-                }
-                onClick={() => setSelectedEvent(ev)}
-              >
-                <div className="name">
-                  <span className={`tag ${ev.category.toLowerCase()}`}>
-                    {ev.category}
-                  </span>
-                  {ev.event_name}
-                </div>
-                <div className="meta">
-                  {ev.event_date} · {ev.expected_impact}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
-
-      <section className="grid-2">
-        <div className="panel">
-          <h2>Event Impact (±90 days)</h2>
-          <p className="sub">
-            Average price change in the 90 days after each event vs. the 90 days
-            before.
-          </p>
-          <div className="chart-wrap">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={impactChart} margin={{ bottom: 60, left: 8 }}>
-                <CartesianGrid stroke="rgba(255,255,255,0.06)" />
-                <XAxis
-                  dataKey="name"
-                  angle={-35}
-                  textAnchor="end"
-                  interval={0}
-                  height={70}
-                  tick={{ fill: "#8fa3b8", fontSize: 10 }}
-                />
-                <YAxis
-                  tick={{ fill: "#8fa3b8", fontSize: 11 }}
-                  unit="%"
-                  width={42}
-                />
-                <Tooltip
-                  contentStyle={{
-                    background: "#122033",
-                    border: "1px solid rgba(255,255,255,0.1)",
-                    borderRadius: 10,
-                  }}
-                  formatter={(v) => [`${v}%`, "Price change"]}
-                />
-                <Bar dataKey="pct" name="% price change" fill="#f0a06a" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="panel">
-          <h2>Bayesian Model Summary</h2>
-          <p className="sub">Single change-point model on monthly average prices.</p>
-          {bayesian ? (
-            <div className="table-wrap">
-              <table>
-                <tbody>
-                  <tr>
-                    <th>Change point (τ)</th>
-                    <td>{bayesian.tau_date}</td>
-                  </tr>
-                  <tr>
-                    <th>95% credible interval</th>
-                    <td>
-                      {bayesian.tau_hdi?.[0]} → {bayesian.tau_hdi?.[1]}
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>Mean before</th>
-                    <td>{formatUSD(bayesian.mu_before)}</td>
-                  </tr>
-                  <tr>
-                    <th>Mean after</th>
-                    <td>{formatUSD(bayesian.mu_after)}</td>
-                  </tr>
-                  <tr>
-                    <th>Regime shift</th>
-                    <td className={bayesian.pct_change >= 0 ? "up" : "down"}>
-                      {bayesian.pct_change > 0 ? "+" : ""}
-                      {bayesian.pct_change}%
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>P(μ₂ &gt; μ₁)</th>
-                    <td>{bayesian.prob_increase}</td>
-                  </tr>
-                </tbody>
-              </table>
+            <div className="analysis">
+              <div id="impact">
+                <ImpactChart impact={impact} selected={selectedEvent} onSelect={selectAndReveal} />
+              </div>
+              <div id="model">
+                <ModelPanel changePoints={data.changePoints} modelError={data.modelError} />
+              </div>
             </div>
-          ) : (
-            <p className="sub">Run the model to populate this panel.</p>
-          )}
 
-          {selectedEvent && (
-            <div className="insight">
-              <h3>Selected event</h3>
+            <ImpactTable impact={impact} selected={selectedEvent} onSelect={selectAndReveal} />
+
+            <footer className="foot">
               <p>
-                <strong>{selectedEvent.event_name}</strong> ({selectedEvent.event_date})
-                — {selectedEvent.description}
+                Daily Brent spot prices, {day(data.metrics.start_date)} to {day(data.metrics.end_date)}. Events are a
+                curated list of fifteen; a break near an event is a match in time, not proof of cause.
               </p>
-              <p className="meta">Expected impact: {selectedEvent.expected_impact}</p>
-            </div>
-          )}
-        </div>
-      </section>
-
-      <section className="panel" style={{ marginTop: 16 }}>
-        <h2>Quantified Event Impacts</h2>
-        <p className="sub">
-          Drill-down table of before/after average prices and volatility around
-          each curated event.
-        </p>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Event</th>
-                <th>Category</th>
-                <th>Price before</th>
-                <th>Price after</th>
-                <th>% change</th>
-                <th>Vol before</th>
-                <th>Vol after</th>
-              </tr>
-            </thead>
-            <tbody>
-              {impact.map((row) => (
-                <tr key={`${row.event_date}-${row.event_name}`}>
-                  <td>{row.event_date}</td>
-                  <td>{row.event_name}</td>
-                  <td>
-                    <span className={`tag ${row.category.toLowerCase()}`}>
-                      {row.category}
-                    </span>
-                  </td>
-                  <td>{formatUSD(row.price_before)}</td>
-                  <td>{formatUSD(row.price_after)}</td>
-                  <td className={row.price_pct_change >= 0 ? "up" : "down"}>
-                    {row.price_pct_change > 0 ? "+" : ""}
-                    {row.price_pct_change}%
-                  </td>
-                  <td>{row.vol_before}</td>
-                  <td>{row.vol_after}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      {error && <p className="error">{error}</p>}
-    </div>
+              <a className="text-link" href={PAGES_URL}>
+                Read the case study
+              </a>
+            </footer>
+          </main>
+        </>
+      )}
+    </>
   );
 }
