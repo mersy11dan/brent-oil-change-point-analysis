@@ -582,7 +582,7 @@ function initMethod() {
       for (const s of steps) s.classList.toggle("is-active", s === e.target);
       frag.dataset.state = e.target.dataset.step;
     }
-  }, { rootMargin: window.matchMedia("(max-width: 900px)").matches ? "-62% 0px -28% 0px" : "-45% 0px -45% 0px" });
+  }, { rootMargin: "-45% 0px -45% 0px" });
   steps.forEach((s) => io.observe(s));
 }
 
