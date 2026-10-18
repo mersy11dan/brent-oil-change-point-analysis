@@ -101,6 +101,10 @@ def export_data() -> dict:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     out = DATA_DIR / "site_data.json"
     out.write_text(json.dumps(payload), encoding="utf-8")
+    # Script copy so the page also works from file://, where fetch() is blocked.
+    (DATA_DIR / "site_data.js").write_text(
+        f"window.SITE_DATA = {json.dumps(payload)};\n", encoding="utf-8"
+    )
     return payload
 
 
