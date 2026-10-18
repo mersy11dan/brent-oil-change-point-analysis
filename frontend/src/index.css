@@ -134,7 +134,7 @@ code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0
 /* ---------- toolbar ---------- */
 .toolbar {
   position: sticky; top: 0; z-index: var(--z-toolbar);
-  background: rgba(255, 255, 255, 0.97);
+  background: #fff;
   border-bottom: 1px solid var(--line);
 }
 .toolbar-inner {

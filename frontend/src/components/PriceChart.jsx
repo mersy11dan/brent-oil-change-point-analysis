@@ -81,9 +81,13 @@ export default function PriceChart({ prices, range, rangeError, bayesian, ruptur
     return out;
   }, [bayesian, tau, lo, hi]);
 
-  const yMax = useMemo(() => {
-    const top = Math.max(0, ...data.map((d) => d.price), ...segments.map((s) => s.y));
-    return Math.max(20, Math.ceil((top * 1.04) / 20) * 20);
+  const { yMax, yTicks } = useMemo(() => {
+    const top = Math.max(10, ...data.map((d) => d.price), ...segments.map((s) => s.y)) * 1.04;
+    const step = [5, 10, 20, 25, 50].find((s) => top / s <= 6) || 50;
+    const max = Math.ceil(top / step) * step;
+    const list = [];
+    for (let v = 0; v <= max; v += step) list.push(v);
+    return { yMax: max, yTicks: list };
   }, [data, segments]);
 
   const { ticks, fmt } = useMemo(() => timeTicks(lo, hi), [lo, hi]);
@@ -140,6 +144,7 @@ export default function PriceChart({ prices, range, rangeError, bayesian, ruptur
               />
               <YAxis
                 domain={[0, yMax]}
+                ticks={yTicks}
                 tickFormatter={(v) => `$${v}`}
                 tick={axisTick}
                 tickLine={false}
