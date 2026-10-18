@@ -58,3 +58,6 @@ Thumbs.db
 .coverage
 htmlcov/
 .mypy_cache/
+
+# Design tooling output
+.taste-skill/
